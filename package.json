@@ -37,7 +37,9 @@
   },
   "dependencies": {
     "handlebars": "4.7.8",
-    "lodash": "4.17.21",
+    "lodash": "4.17.21"
+  },
+  "peerDependencies": {
     "zod": "3.23.8"
   },
   "devDependencies": {
