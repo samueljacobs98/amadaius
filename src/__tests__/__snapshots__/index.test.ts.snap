@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Amadaius Library Tests Partial Prompt Templates Error handling when asynchronous transformation fails 1`] = `"Failed to fetch user data"`;
+
+exports[`Amadaius Library Tests Partial Prompt Templates Error handling when partial data does not meet schema requirements 1`] = `
+"[
+  {
+    "code": "invalid_type",
+    "expected": "string",
+    "received": "number",
+    "path": [
+      "persona",
+      "id"
+    ],
+    "message": "Expected string, received number"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "string",
+    "received": "undefined",
+    "path": [
+      "persona",
+      "name"
+    ],
+    "message": "Required"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "string",
+    "received": "undefined",
+    "path": [
+      "question"
+    ],
+    "message": "Required"
+  }
+]"
+`;
+
+exports[`Amadaius Library Tests Prompt Templates Error handling when validation fails 1`] = `
+"[
+  {
+    "code": "invalid_type",
+    "expected": "string",
+    "received": "number",
+    "path": [
+      "name"
+    ],
+    "message": "Expected string, received number"
+  }
+]"
+`;
