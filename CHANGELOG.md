@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/samueljacobs98/amadaius/compare/v1.0.0...v1.0.1) (2024-12-23)
+
+
+### Bug Fixes
+
+* release from dist ([de8fdd5](https://github.com/samueljacobs98/amadaius/commit/de8fdd5d366393ddc3ea944ebe39c2831b5d8321))
+
 # 1.0.0 (2024-12-23)
 
 
