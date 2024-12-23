@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/samueljacobs98/amadaius/compare/v1.0.1...v1.0.2) (2024-12-23)
+
+
+### Bug Fixes
+
+* made zod a peer dependency ([42573f8](https://github.com/samueljacobs98/amadaius/commit/42573f838bbeac14a13c3c0820fcffab252e8150))
+
 ## [1.0.1](https://github.com/samueljacobs98/amadaius/compare/v1.0.0...v1.0.1) (2024-12-23)
 
 
