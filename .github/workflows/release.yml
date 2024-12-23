@@ -19,13 +19,17 @@ jobs:
       - name: Use Node
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: "20.x"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm install
 
       - name: Build
         run: npm run build
+
+      - name: Verify npm Package
+        run: npm pack --dry-run
 
       - name: Release
         run: npm run release

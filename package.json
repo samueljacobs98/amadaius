@@ -3,7 +3,13 @@
   "version": "1.0.0",
   "description": "Amadius is a simple and lightweight prompt-templating engine.",
   "author": "Samuel Jacobs",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "license": "MIT",
   "save-exact": true,
   "homepage": "https://github.com/samueljacobs98/amadaius#readme",
