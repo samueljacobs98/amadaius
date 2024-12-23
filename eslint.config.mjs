@@ -8,34 +8,37 @@ import prettierPlugin from "eslint-plugin-prettier";
 import jestPlugin from "eslint-plugin-jest";
 
 export default [
-  // Base ESLint recommended configurations
-  eslint.configs.recommended,
-
-  // TypeScript-specific configurations
   {
+    ignores: ["jest.config.js", "eslint.config.mjs"],
+  },
+  eslint.configs.recommended,
+  // Configuration for non-test files
+  {
+    files: ["**/__tests__/**/*.{js,ts}", "**/*.test.{js,ts}"],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
-        project: "./tsconfig.json",
+        project: "./tsconfig.eslint.json",
       },
     },
     plugins: {
       "@typescript-eslint": tsPlugin,
     },
     rules: {
-      // Enable or customize TypeScript-specific rules
       "@typescript-eslint/no-unused-vars": [
         "error",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
-      // Add more TypeScript rules as needed
     },
   },
-
-  // Jest-specific configurations for test files
+  // Configuration for test files
   {
     files: ["**/__tests__/**/*.{js,ts}", "**/*.test.{js,ts}"],
     languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        project: "./tsconfig.eslint.json",
+      },
       globals: {
         describe: "readonly",
         test: "readonly",
@@ -51,17 +54,18 @@ export default [
       jest: jestPlugin,
     },
     rules: {
-      // Enable Jest-specific rules
       "jest/no-disabled-tests": "warn",
       "jest/no-focused-tests": "error",
       "jest/no-identical-title": "error",
       "jest/prefer-to-have-length": "warn",
       "jest/valid-expect": "error",
-      // Add more Jest rules as needed
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
     },
   },
-
-  // Prettier integration
+  // Prettier Configuration
   {
     plugins: {
       prettier: prettierPlugin,
@@ -70,7 +74,5 @@ export default [
       "prettier/prettier": "error",
     },
   },
-
-  // Disable ESLint rules that might conflict with Prettier
   prettier,
 ];
