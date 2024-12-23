@@ -12,7 +12,6 @@ export default [
     ignores: ["jest.config.js", "eslint.config.mjs"],
   },
   eslint.configs.recommended,
-  // Configuration for non-test files
   {
     files: ["**/__tests__/**/*.{js,ts}", "**/*.test.{js,ts}"],
     languageOptions: {
@@ -31,7 +30,6 @@ export default [
       ],
     },
   },
-  // Configuration for test files
   {
     files: ["**/__tests__/**/*.{js,ts}", "**/*.test.{js,ts}"],
     languageOptions: {
@@ -65,7 +63,6 @@ export default [
       ],
     },
   },
-  // Prettier Configuration
   {
     plugins: {
       prettier: prettierPlugin,
