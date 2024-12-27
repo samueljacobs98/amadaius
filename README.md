@@ -20,12 +20,14 @@ Amadaius is a TypeScript/JavaScript library for composing and building text prom
 3. [Basic Usage](#basic-usage)
    - [Creating a Prompt Template](#creating-a-prompt-template)
    - [Validating and Transforming Data](#validating-and-transforming-data)
+   - [Composing Prompt Templates](#composing-prompt-templates)
    - [Partial Templates](#partial-templates)
 4. [API Reference](#api-reference)
    - [`promptTemplate(schema, templateStr, options?)`](#prompttemplateschema-templatestr-options)
    - [Class: `PromptTemplate<TSchema>`](#class-prompttemplatetschema)
      - [`build(data)`](#builddata)
      - [`buildAsync(data)`](#buildasyncdata)
+     - [`asSchema()`](#asschema)
      - [`asPartial()`](#aspartial)
    - [Class: `PartialPromptTemplate<TSchema>`](#class-partialprompttemplatetschema)
      - [`partial(data)`](#partialdata)
@@ -102,7 +104,7 @@ const userSchema = z
 
 const userPrompt = promptTemplate(
   userSchema,
-  "Hello, {{name}}! Your ID is {{id}}."
+  "Hello, {{name}}! Your ID is {{id}}.",
 );
 
 try {
@@ -123,7 +125,7 @@ const transformSchema = z.string().transform((topic) => ({ topic })); // transfo
 
 const transformPrompt = promptTemplate(
   transformSchema,
-  "Write a story about {{topic}}!"
+  "Write a story about {{topic}}!",
 );
 
 // We can pass just a string; the schema transforms it into { topic }
@@ -131,6 +133,34 @@ const transformResult = transformPrompt.build("dinosaurs");
 
 console.log(transformResult);
 // -> "Write a story about dinosaurs!"
+```
+
+### Composing Prompt Templates
+
+You can convert a `PromptTemplate` into a Zod schema using `asSchema()`. This allows you to compose prompt templates together.
+
+```typescript
+import { promptTemplate } from "amadaius";
+import { z } from "zod";
+
+// Define smaller prompt templates
+const pt1 = promptTemplate(z.object({ name: z.string() }), "Hello, {{name}}!");
+const pt2 = promptTemplate(
+  z.object({ question: z.string() }),
+  "How are you, {{question}}",
+);
+
+// Compose them into a single prompt
+const result = promptTemplate(
+  z.object({ greeting: pt1.asSchema(), request: pt2.asSchema() }),
+  "{{greeting}} {{request}}",
+).build({
+  greeting: { name: "Alice" },
+  request: { question: "What is your favorite color?" },
+});
+
+console.log(result);
+// -> "Hello, Alice! How are you, What is your favorite color?"
 ```
 
 ### Partial Templates
@@ -148,7 +178,7 @@ const questionSchema = z.object({
 
 const questionPrompt = promptTemplate(
   questionSchema,
-  "You are {{persona}}. Respond to: {{message}}"
+  "You are {{persona}}. Respond to: {{message}}",
 );
 
 // Convert to partial template
@@ -186,7 +216,7 @@ Creates a new `PromptTemplate` instance.
 function promptTemplate<TSchema extends ZodType<any, any>>(
   schema: TSchema,
   templateStr: string,
-  options?: PromptTemplateOptions
+  options?: PromptTemplateOptions,
 ): PromptTemplate<TSchema>;
 ```
 
@@ -250,6 +280,20 @@ async buildAsync(data: z.input<TSchema>): Promise<string>;
 **Throws**
 
 - Zod validation errors if `data` doesn't match the schema.
+
+#### `asSchema()`
+
+Enables prompt template composition by converting the `PromptTemplate` into a zod schema with a built-in `transform`.
+
+**Signature**
+
+```typescript
+asSchema(): ZodType<z.input<TSchema>, string, unknown>;
+```
+
+**Returns**
+
+- A new Zod schema with a built-in `transform` method that converts the data into a built prompt.
 
 #### `asPartial()`
 
