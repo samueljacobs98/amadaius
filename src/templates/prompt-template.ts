@@ -36,4 +36,8 @@ export class PromptTemplate<TSchema extends ZodTypeAny> {
       this.options,
     );
   }
+
+  asSchema(): ZodTypeAny {
+    return this.schema.transform((data) => this.compiledTemplate(data));
+  }
 }

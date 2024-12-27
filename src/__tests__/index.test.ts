@@ -247,6 +247,43 @@ describe("Amadaius Library Tests", () => {
 
       expect(() => pt.build({ name: "John" })).toThrow(error);
     });
+
+    test("Compose templates", () => {
+      const pt1 = promptTemplate(z.string(), "Hello, {{this}}!");
+      const pt2 = promptTemplate(z.string(), "How are you, {{this}}");
+
+      const result = promptTemplate(
+        z.object({ greeting: pt1.asSchema(), question: pt2.asSchema() }),
+        "{{greeting}} {{question}}",
+      ).build({ greeting: "Alice", question: "What is your favorite color?" });
+
+      expect(result).toBe(
+        "Hello, Alice! How are you, What is your favorite color?",
+      );
+    });
+
+    test("Compose complex templates", () => {
+      const pt1 = promptTemplate(
+        z.object({ name: z.string() }),
+        "Hello, {{name}}!",
+      );
+      const pt2 = promptTemplate(
+        z.object({ question: z.string() }),
+        "How are you, {{question}}",
+      );
+
+      const result = promptTemplate(
+        z.object({ greeting: pt1.asSchema(), request: pt2.asSchema() }),
+        "{{greeting}} {{request}}",
+      ).build({
+        greeting: { name: "Alice" },
+        request: { question: "What is your favorite color?" },
+      });
+
+      expect(result).toBe(
+        "Hello, Alice! How are you, What is your favorite color?",
+      );
+    });
   });
 
   describe("Partial Prompt Templates", () => {
