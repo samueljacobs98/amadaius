@@ -1,8 +1,15 @@
+import { HelperDelegate } from "handlebars";
+
+/**
+ * Converts a type to a type where all properties are optional.
+ */
 export type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
 };
 
+/**
+ *  Configuration options for a PromptTemplate instance.
+ */
 export type PromptTemplateOptions = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  helpers?: Record<string, (...args: any) => any>;
+  helpers?: Record<string, HelperDelegate>;
 };
