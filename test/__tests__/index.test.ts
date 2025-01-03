@@ -1,6 +1,6 @@
-import { promptTemplate } from "../index";
+import { promptTemplate } from "../../src";
 import { z } from "zod";
-import { PartialPromptTemplate } from "../templates/partial-prompt-template";
+import { PartialPromptTemplate } from "../../src/templates/partial-prompt-template";
 
 describe("Amadaius Library Tests", () => {
   describe("Prompt Templates", () => {
