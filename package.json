@@ -1,6 +1,6 @@
 {
   "name": "amadaius",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Amadius is a simple and lightweight prompt-templating engine.",
   "author": "Samuel Jacobs",
   "main": "dist/index.js",
