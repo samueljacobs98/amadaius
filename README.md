@@ -1,28 +1,39 @@
 # Amadaius
 
-Amadaius is a TypeScript/JavaScript library for composing and building text prompt templates. It leverages:
+[Amadaius](https://github.com/samueljacobs98/amadaius) is a TypeScript/JavaScript library designed to simplify and streamline the process of creating text-based prompts for AI applications. By separating **data validation and transformation** and **prompt structure**, Amadaius ensures your prompts are robust, reusable, and easy to manage.
+
+Amadaius leverages:
 
 - [Zod](https://github.com/colinhacks/zod) for data validation and transformations.
 - [Handlebars](https://github.com/handlebars-lang/handlebars.js/) for templating.
 - Optional custom helpers that can be easily plugged in.
 
-> **tl;dr**  
-> **Zod** handles schema validation so you know your template data matches exactly what you expect.  
-> **Handlebars** compiles your templates into plain strings.  
-> **Partial application** allows you to incrementally fill the data required by your prompt.
+## Why Use Amadaius?
+
+1. **Separation of Concerns**: Keep your prompt content and structure independent, making it easier to update, localize, and reuse templates.
+2. **Validation and Transformation**: Ensure your data is always in the correct format with Zod's powerful schema validation and enrichment features.
+3. **Dynamic Templating**: Use Handlebars for conditional logic, loops, and custom helpers to create flexible and adaptable prompts.
+4. **Modular Template Composition**: Build complex prompt templates seamlessly from smaller prompt templates.
+5. **Incremental Application**: Build complex prompts step-by-step with partial templates, allowing you to fill in data incrementally.
+6. **Async Support**: Handle asynchronous data fetching and transformations effortlessly.
+
+> **TL;DR**  
+> Amadaius enables you to create prompts that are validated, enriched, and dynamically generated with minimal effort. It's ideal for building AI applications that require structured and reusable prompts.
 
 ---
 
 ## Table of Contents
 
-1. [Features](#features)
-2. [Installation](#installation)
-3. [Basic Usage](#basic-usage)
+1. [Concepts](#concepts)
+2. [Features](#features)
+3. [Installation](#installation)
+4. [Basic Usage](#basic-usage)
    - [Creating a Prompt Template](#creating-a-prompt-template)
    - [Validating and Transforming Data](#validating-and-transforming-data)
    - [Composing Prompt Templates](#composing-prompt-templates)
    - [Partial Templates](#partial-templates)
-4. [API Reference](#api-reference)
+   - [Async Data Transformations](#async-data-transformations)
+5. [API Reference](#api-reference)
    - [`promptTemplate(schema, templateStr, options?)`](#prompttemplateschema-templatestr-options)
    - [Class: `PromptTemplate<TSchema>`](#class-prompttemplatetschema)
      - [`build(data)`](#builddata)
@@ -34,8 +45,34 @@ Amadaius is a TypeScript/JavaScript library for composing and building text prom
      - [`build()`](#build)
      - [`buildAsync()`](#buildasync)
      - [`copy()`](#copy)
-5. [Contributing](#contributing)
-6. [License](#license)
+6. [Contributing](#contributing)
+7. [License](#license)
+
+---
+
+## Concepts
+
+### Prompt Structure and Content
+
+- **Prompt Structure**: How the content of the prompt is laid out, defined using a Handlebars template string.
+- **Prompt Content**: The validated and enriched data provided to the template to populate the structure.
+
+### Validation and Enrichment with Zod
+
+- **Validation**: Ensures the data adheres to the expected shape and constraints.
+- **Enrichment**: Transforms or adds data using Zod's `transform` method.
+
+### Handlebars Helpers
+
+Custom functions injected into templates to add dynamic behavior.
+
+### Separation of Concerns
+
+Amadaius emphasizes keeping **content** (data) and **structure** (template) independent, enabling easier reuse and localization.
+
+### Modular Template Composition
+
+Use the `asSchema` method to compose smaller prompt templates into larger, more complex templates, promoting modularity and reusability.
 
 ---
 
@@ -44,7 +81,8 @@ Amadaius is a TypeScript/JavaScript library for composing and building text prom
 - **Zod Validation**: Ensure your template data is correct.
 - **Handlebars-based Templating**: Use Handlebars features like conditionals, loops, helpers, and comments.
 - **Partial Prompt Templates**: Build complex prompts incrementally, adding or overriding data fields at each step.
-- **Asynchronous Support**: Seamlessly handle asynchronous data transformations (`buildAsync`).
+- **Asynchronous Support**: Seamlessly handle asynchronous data transformations ([`buildAsync(data)`](#buildasyncdata)).
+- **Modular Composition**: Combine smaller prompt templates into larger ones using [`asSchema()`](#asschema).
 
 ---
 
@@ -53,9 +91,6 @@ Amadaius is a TypeScript/JavaScript library for composing and building text prom
 ```bash
 # Using npm
 npm install amadaius
-
-# Using yarn
-yarn add amadaius
 ```
 
 ---
@@ -72,10 +107,11 @@ yarn add amadaius
 import { promptTemplate } from "amadaius";
 import { z } from "zod";
 
-const storySchema = z.object({ topic: z.string() });
-
 // Template references `{{topic}}`
-const myPrompt = promptTemplate(storySchema, "Write a story about {{topic}}!");
+const myPrompt = promptTemplate(
+  z.object({ topic: z.string() }),
+  "Write a story about {{topic}}!",
+);
 
 // Provide data matching the schema
 const result = myPrompt.build({ topic: "dragons" });
@@ -93,17 +129,15 @@ import { promptTemplate } from "amadaius";
 import { z } from "zod";
 
 // Example of refining schema
-const userSchema = z
-  .object({
-    id: z.string(),
-    name: z.string(),
-  })
-  .refine((data) => data.id.length === 10, {
-    message: "User ID must be exactly 10 characters long",
-  });
-
 const userPrompt = promptTemplate(
-  userSchema,
+  z
+    .object({
+      id: z.string(),
+      name: z.string(),
+    })
+    .refine((data) => data.id.length === 10, {
+      message: "User ID must be exactly 10 characters long",
+    }),
   "Hello, {{name}}! Your ID is {{id}}.",
 );
 
@@ -145,10 +179,8 @@ import { z } from "zod";
 
 // Define smaller prompt templates
 const pt1 = promptTemplate(z.object({ name: z.string() }), "Hello, {{name}}!");
-const pt2 = promptTemplate(
-  z.object({ question: z.string() }),
-  "How are you, {{question}}",
-);
+
+const pt2 = promptTemplate(z.object({ question: z.string() }), "{{question}}");
 
 // Compose them into a single prompt
 const result = promptTemplate(
@@ -160,7 +192,7 @@ const result = promptTemplate(
 });
 
 console.log(result);
-// -> "Hello, Alice! How are you, What is your favorite color?"
+// -> "Hello, Alice! What is your favorite color?"
 ```
 
 ### Partial Templates
@@ -171,13 +203,11 @@ Sometimes you need to **partially apply** data to a template and fill in the res
 import { promptTemplate } from "amadaius";
 import { z } from "zod";
 
-const questionSchema = z.object({
-  persona: z.string(),
-  message: z.string(),
-});
-
 const questionPrompt = promptTemplate(
-  questionSchema,
+  z.object({
+    persona: z.string(),
+    message: z.string(),
+  }),
   "You are {{persona}}. Respond to: {{message}}",
 );
 
@@ -200,6 +230,98 @@ You can also **copy** a `PartialPromptTemplate` to create a new instance with th
 ```typescript
 const partialPromptCopy = partialPrompt.copy();
 // partialPromptCopy shares the same partial data initially, then you can branch out
+```
+
+---
+
+### Async Data Transformations
+
+### Custom Handlebars Helpers
+
+You can add custom Handlebars helpers to your templates by passing them in the `helpers` option.
+
+```typescript
+import { promptTemplate } from "amadaius";
+
+const pt = promptTemplate(
+  z.object({
+    persona: z.string(),
+    user_message: z.string(),
+    tone: z.enum(["formal", "casual", "enthusiastic"]),
+  }),
+  `
+  You are a helpful AI assistant who always follows the persona and tone specified below.
+  Persona: {{persona}}
+
+  User said: "{{transformTone user_message tone}}"
+
+  Please respond to the user's message in a manner consistent with the persona and tone above.
+  `,
+  {
+    helpers: {
+      transformTone: (
+        message: string,
+        tone: "formal" | "casual" | "enthusiastic",
+      ) => {
+        switch (tone) {
+          case "formal":
+            return `Good day. I would like to bring to your attention: ${
+              message.charAt(0).toUpperCase() + message.slice(1)
+            }.`;
+          case "casual":
+            return `Hey! So basically: ${message}`;
+          case "enthusiastic":
+            return `Wow, check this out: ${message}!!!`;
+          default:
+            return message;
+        }
+      },
+    },
+  },
+);
+
+pt.build({
+  persona: "A knowledgeable librarian",
+  user_message: "could you help me find a good science fiction book?",
+  tone: "enthusiastic",
+});
+
+console.log(pt);
+// -> `You are a helpful AI assistant who always follows the persona and tone specified below.
+//     Persona: A knowledgeable librarian
+//
+//    User said: "Wow, check this out: could you help me find a good science fiction book?!!!"
+//
+//    Please respond to the user's message in a manner consistent with the persona and tone above.
+// `
+```
+
+---
+
+Amadaius supports asynchronous data transformations using `buildAsync(data)`.
+
+```typescript
+import { promptTemplate } from "amadaius";
+
+const asyncPrompt = promptTemplate(
+  z
+    .object({
+      productNumber: z.number(),
+    })
+    .transform(async ({ productNumber }) => {
+      await getProductData(productNumber);
+      return {
+        productNumber,
+        productData: JSON.stringify(productData, null, 2),
+      };
+    }),
+  "Act as an expert in creating product descriptions.\n\nProduct {{productNumber}}:\n\n{{productData}}\n\nCreate a product description based on the data provided.",
+);
+
+const prompt = await asyncPrompt.buildAsync({ productNumber: 1234 });
+
+console.log(prompt);
+// -> "Act as an expert in creating product descriptions.\n\nProduct 1234:\n\n{ ... }\n\nCreate a product description based on the data provided."
 ```
 
 ---
