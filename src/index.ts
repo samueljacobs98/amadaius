@@ -2,6 +2,8 @@ import { ZodTypeAny } from "zod";
 import { PromptTemplateOptions } from "./types";
 import { PromptTemplate } from "./templates/prompt-template";
 
+export * from "./types";
+
 /**
  * Creates a new PromptTemplate instance.
  *
