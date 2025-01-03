@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/samueljacobs98/amadaius/compare/v1.1.0...v1.1.1) (2025-01-03)
+
+
+### Bug Fixes
+
+* Update .releaserc ([fcddd9b](https://github.com/samueljacobs98/amadaius/commit/fcddd9b851d429f44a876534c7fe03291dfb2600))
+
 ## [1.0.2](https://github.com/samueljacobs98/amadaius/compare/v1.0.1...v1.0.2) (2024-12-23)
 
 
