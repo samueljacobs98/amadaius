@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/samueljacobs98/amadaius/compare/v1.1.1...v1.1.2) (2025-01-03)
+
+
+### Bug Fixes
+
+* **eslint:** enable TS linting in src and disable base no-unused-vars rule ([be9f336](https://github.com/samueljacobs98/amadaius/commit/be9f336c901b1de32c8399f8906c1249ffd031df))
+
 ## [1.1.1](https://github.com/samueljacobs98/amadaius/compare/v1.1.0...v1.1.1) (2025-01-03)
 
 
