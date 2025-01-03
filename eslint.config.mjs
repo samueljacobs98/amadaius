@@ -13,6 +13,25 @@ export default [
   },
   eslint.configs.recommended,
   {
+    files: ["src/**/*.{js,ts}"],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        project: "./tsconfig.eslint.json",
+      },
+    },
+    plugins: {
+      "@typescript-eslint": tsPlugin,
+    },
+    rules: {
+      "no-unused-vars": "off", // disable base rule
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
+    },
+  },
+  {
     files: ["**/__tests__/**/*.{js,ts}", "**/*.test.{js,ts}"],
     languageOptions: {
       parser: tsParser,
