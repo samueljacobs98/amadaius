@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/samueljacobs98/amadaius/compare/v1.2.0...v1.2.1) (2025-01-26)
+
+
+### Reverts
+
+* Revert "feat: include metadata in PromptTemplate build result" ([a8d2ca3](https://github.com/samueljacobs98/amadaius/commit/a8d2ca37e1062bee37f83e888e4d0c0466129a4d))
+
 # [1.2.0](https://github.com/samueljacobs98/amadaius/compare/v1.1.2...v1.2.0) (2025-01-26)
 
 
