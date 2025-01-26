@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/samueljacobs98/amadaius/compare/v1.1.2...v1.2.0) (2025-01-26)
+
+
+### Features
+
+* include metadata in PromptTemplate build result ([f567f71](https://github.com/samueljacobs98/amadaius/commit/f567f7195874d3da02ecad7df6f9ff2889641753))
+
 ## [1.1.2](https://github.com/samueljacobs98/amadaius/compare/v1.1.1...v1.1.2) (2025-01-03)
 
 
