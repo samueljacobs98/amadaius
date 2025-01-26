@@ -10,18 +10,16 @@ describe("Amadaius Library Tests", () => {
         "Write a story about {{topic}}!",
       );
 
-      const result = pt.build({ topic: "dragons" }).prompt;
+      const result = pt.build({ topic: "dragons" });
 
       expect(result).toBe("Write a story about dragons!");
     });
 
     test("Comments ignored in template rendering", () => {
-      const pt = promptTemplate(
+      const result = promptTemplate(
         z.object({ topic: z.string() }),
         "{{!-- This is a comment --}}Write a story about {{topic}}!{{!-- This is a comment --}}",
-      );
-
-      const result = pt.build({ topic: "dragons" }).prompt;
+      ).build({ topic: "dragons" });
 
       expect(result).toBe("Write a story about dragons!");
     });
@@ -35,15 +33,15 @@ describe("Amadaius Library Tests", () => {
         `Write a story about {{topic}}{{#if and}} and {{and}}{{/if}}!`,
       );
 
-      const result = pt.build({ topic: "dragons" }).prompt;
+      const result = pt.build({ topic: "dragons" });
       expect(result).toBe("Write a story about dragons!");
 
-      const resultWith = pt.build({ topic: "dragons", and: "knights" }).prompt;
+      const resultWith = pt.build({ topic: "dragons", and: "knights" });
       expect(resultWith).toBe("Write a story about dragons and knights!");
     });
 
     test("Template rendering with custom helper", () => {
-      const pt = promptTemplate(
+      const result = promptTemplate(
         z.object({
           persona: z.string(),
           user_message: z.string(),
@@ -78,13 +76,11 @@ describe("Amadaius Library Tests", () => {
             },
           },
         },
-      );
-
-      const result = pt.build({
+      ).build({
         persona: "A knowledgeable librarian",
         user_message: "could you help me find a good science fiction book?",
         tone: "enthusiastic",
-      }).prompt;
+      });
 
       const expectedOutput = `You are a helpful AI assistant who always follows the persona and tone specified below.
     Persona: A knowledgeable librarian
@@ -104,8 +100,8 @@ describe("Amadaius Library Tests", () => {
         "Write a story about {{topic}}!",
       );
 
-      const result1 = pt.build({ topic: "dragons" }).prompt;
-      const result2 = pt.build({ topic: "knights" }).prompt;
+      const result1 = pt.build({ topic: "dragons" });
+      const result2 = pt.build({ topic: "knights" });
 
       expect(result1).toBe("Write a story about dragons!");
       expect(result2).toBe("Write a story about knights!");
@@ -119,7 +115,7 @@ describe("Amadaius Library Tests", () => {
         "Write a story about {{topic}}!",
       );
 
-      const result = pt.build({ topic: "knights" }).prompt;
+      const result = pt.build({ topic: "knights" });
 
       expect(result).toBe("Write a story about knights!");
     });
@@ -134,13 +130,13 @@ describe("Amadaius Library Tests", () => {
 {{#if age}}{{name}}'s age is {{age}}.{{/if}}`,
       );
 
-      const resultWithValues = pt.build({ name: "Alice", age: 30 }).prompt;
-      const resultWithoutValues = pt.build({}).prompt.trim();
+      const resultWithValues = pt.build({ name: "Alice", age: 30 });
+      const resultWithoutValues = pt.build({});
 
-      expect(resultWithValues).toBe(
+      expect(resultWithValues.trim()).toBe(
         "You are speaking to Alice!\nAlice's age is 30.",
       );
-      expect(resultWithoutValues).toBe("You are speaking to Guest!");
+      expect(resultWithoutValues.trim()).toBe("You are speaking to Guest!");
     });
 
     test("Template rendering with complex data types (arrays and nested objects)", () => {
@@ -182,7 +178,7 @@ describe("Amadaius Library Tests", () => {
   A:
   `;
 
-      const result = pt.build(data).prompt;
+      const result = pt.build(data);
       expect(result.trim()).toBe(expectedOutput.trim());
     });
 
@@ -200,14 +196,11 @@ describe("Amadaius Library Tests", () => {
       const validData = { id: "0123456789", name: "Valid User" };
       const invalidData = { id: "too short", name: "Invalid User" };
 
-      const result = pt.build(validData).prompt;
-
-      expect(result).toBe(
+      expect(pt.build(validData)).toBe(
         `Use the greet_user tool to greet the following user with name: ${validData.name} and ID: ${validData.id}`,
       );
 
-      const createResult = () => pt.build(invalidData);
-      expect(createResult).toThrow();
+      expect(() => pt.build(invalidData)).toThrow();
     });
 
     test("Template rendering with transformed schema", () => {
@@ -216,7 +209,7 @@ describe("Amadaius Library Tests", () => {
         "Write a story about {{topic}}!",
       );
 
-      const result = pt.build("dragons").prompt;
+      const result = pt.build("dragons");
 
       expect(result).toBe("Write a story about dragons!");
     });
@@ -229,7 +222,7 @@ describe("Amadaius Library Tests", () => {
         "User ID: {{userId}}",
       );
 
-      const result = (await pt.buildAsync({ userId: "async123" })).prompt;
+      const result = await pt.buildAsync({ userId: "async123" });
 
       expect(result).toBe("User ID: async123");
     });
@@ -259,15 +252,10 @@ describe("Amadaius Library Tests", () => {
       const pt1 = promptTemplate(z.string(), "Hello, {{this}}!");
       const pt2 = promptTemplate(z.string(), "How are you, {{this}}");
 
-      const composedPt = promptTemplate(
+      const result = promptTemplate(
         z.object({ greeting: pt1.asSchema(), question: pt2.asSchema() }),
         "{{greeting}} {{question}}",
-      );
-
-      const result = composedPt.build({
-        greeting: "Alice",
-        question: "What is your favorite color?",
-      }).prompt;
+      ).build({ greeting: "Alice", question: "What is your favorite color?" });
 
       expect(result).toBe(
         "Hello, Alice! How are you, What is your favorite color?",
@@ -284,48 +272,17 @@ describe("Amadaius Library Tests", () => {
         "How are you, {{question}}",
       );
 
-      const composedPt = promptTemplate(
+      const result = promptTemplate(
         z.object({ greeting: pt1.asSchema(), request: pt2.asSchema() }),
         "{{greeting}} {{request}}",
-      );
-
-      const result = composedPt.build({
+      ).build({
         greeting: { name: "Alice" },
         request: { question: "What is your favorite color?" },
-      }).prompt;
+      });
 
       expect(result).toBe(
         "Hello, Alice! How are you, What is your favorite color?",
       );
-    });
-
-    test("Built templates return metadata", () => {
-      const metadata = {
-        templateId: "story-template",
-        experimentId: "experiment-123",
-        version: "1.0",
-        description: "A template for writing stories",
-        custom: {
-          key: "value",
-        },
-      };
-
-      const pt = promptTemplate(
-        z.object({ topic: z.string() }),
-        "Write a story about {{topic}}!",
-        { metadata },
-      );
-
-      const { metadata: result } = pt.build({ topic: "dragons" });
-
-      const expectedOutput = {
-        ...metadata,
-        templateStr: "Write a story about {{topic}}!",
-        data: { topic: "dragons" },
-        type: "full",
-      };
-
-      expect(result).toMatchObject(expectedOutput);
     });
   });
 
@@ -341,7 +298,7 @@ describe("Amadaius Library Tests", () => {
       expect(partialPt).toBeInstanceOf(PartialPromptTemplate);
     });
 
-    test("Create a partial prompt template from prompt template with string schema", () => {
+    test("Create a partial prompt template from prompte template with string schema", () => {
       const pt = promptTemplate(z.string(), `You are {{this}}`);
 
       const partialPt = pt.asPartial();
@@ -366,7 +323,7 @@ describe("Amadaius Library Tests", () => {
         .partial({ persona: "a knowledgeable AI librarian" })
         .partial({ message: "What are the best science fiction books?" });
 
-      const result = partialPt.build().prompt;
+      const result = partialPt.build();
 
       const expectedOutput = `You are a knowledgeable AI librarian. Respond: What are the best science fiction books?`;
 
@@ -392,7 +349,7 @@ describe("Amadaius Library Tests", () => {
         message: "What are the best science fiction books?",
       });
 
-      const result = partialPt.build().prompt;
+      const result = partialPt.build();
 
       const expectedOutput = `You are a knowledgeable AI librarian. Respond: What are the best science fiction books?`;
 
@@ -446,7 +403,7 @@ describe("Amadaius Library Tests", () => {
         tone: "enthusiastic",
       });
 
-      const result = partialPt.build().prompt;
+      const result = partialPt.build();
 
       const expectedOutput = `You are a helpful AI assistant who always follows the persona and tone specified below.
       Persona: A knowledgeable librarian
@@ -500,8 +457,8 @@ describe("Amadaius Library Tests", () => {
         message: "What are the best movies?",
       });
 
-      const result1 = partialPt1.build().prompt;
-      const result2 = partialPt2.build().prompt;
+      const result1 = partialPt1.build();
+      const result2 = partialPt2.build();
 
       const expectedOutput1 =
         "You are an expert AI assistant. Respond: What are the best books?";
@@ -536,7 +493,7 @@ describe("Amadaius Library Tests", () => {
         question: "What breakthroughs have happened in AI recently?",
       });
 
-      const result = partialPt.build().prompt;
+      const result = partialPt.build();
 
       const expectedOutput = `
         Hello Alice, as a world-renowned AI expert, could you please provide insight on the following?
@@ -564,7 +521,7 @@ describe("Amadaius Library Tests", () => {
         .asPartial()
         .partial({ userId: "async123" });
 
-      const result = (await partialPt.buildAsync()).prompt;
+      const result = await partialPt.buildAsync();
 
       expect(result).toBe("User: Async User (ID: async123)");
     });
@@ -582,14 +539,12 @@ describe("Amadaius Library Tests", () => {
     Hello {{persona.name}}, as a world-renowned AI expert, could you please provide insight on the following?
     Question: {{question}}
     `,
-      ).asPartial();
+      )
+        .asPartial()
+        // @ts-expect-error Type 'number' is not assignable to type 'string'.
+        .partial({ persona: { id: 123 } });
 
-      // @ts-expect-error Type 'number' is not assignable to type 'string'.
-      partialPt.partial({ persona: { id: 123 } });
-
-      const createResult = () => partialPt.build();
-
-      expect(createResult).toThrowErrorMatchingSnapshot();
+      expect(() => partialPt.build()).toThrowErrorMatchingSnapshot();
     });
 
     test("Error handling when asynchronous transformation fails", async () => {
@@ -606,38 +561,9 @@ describe("Amadaius Library Tests", () => {
         .asPartial()
         .partial({ userId: "async123" });
 
-      const resultPromise = partialPt.buildAsync();
-      await expect(resultPromise).rejects.toThrowErrorMatchingSnapshot();
-    });
-
-    test("Built partial templates return metadata", () => {
-      const metadata = {
-        templateId: "story-template",
-        experimentId: "experiment-123",
-        version: "1.0",
-        description: "A template for writing stories",
-        custom: {
-          key: "value",
-        },
-        type: "partial",
-      };
-
-      const pt = promptTemplate(
-        z.object({ topic: z.string() }),
-        "Write a story about {{topic}}!",
-        { metadata },
-      ).asPartial();
-
-      const { metadata: result } = pt.partial({ topic: "dragons" }).build();
-
-      const expectedOutput = {
-        ...metadata,
-        templateStr: "Write a story about {{topic}}!",
-        data: { topic: "dragons" },
-        type: "partial",
-      };
-
-      expect(result).toMatchObject(expectedOutput);
+      await expect(
+        partialPt.buildAsync(),
+      ).rejects.toThrowErrorMatchingSnapshot();
     });
   });
 });
