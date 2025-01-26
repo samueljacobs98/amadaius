@@ -1,6 +1,10 @@
 import { z, ZodTypeAny } from "zod";
 import Handlebars from "handlebars";
-import { PromptTemplateOptions } from "../types";
+import {
+  PromptTemplateBuildResult,
+  PromptTemplateBuildResultAsync,
+  PromptTemplateOptions,
+} from "../types";
 import { PartialPromptTemplate } from "./partial-prompt-template";
 
 /**
@@ -16,14 +20,14 @@ export class PromptTemplate<TSchema extends ZodTypeAny> {
    *
    * @param schema - The Zod schema for validating input data.
    * @param templateStr - The Handlebars template string.
-   * @param options - Optional configuration, including helpers.
+   * @param options - Optional configuration, including helpers and metadata.
    */
   constructor(
     private schema: TSchema,
     private templateStr: string,
-    private options?: PromptTemplateOptions,
+    private options: PromptTemplateOptions<TSchema>,
   ) {
-    if (this.options?.helpers) {
+    if (this.options.helpers) {
       Object.entries(this.options.helpers).forEach(([name, helper]) => {
         this.hb.registerHelper(name, helper);
       });
@@ -34,22 +38,40 @@ export class PromptTemplate<TSchema extends ZodTypeAny> {
    * Builds the final template string by validating and processing the input data.
    *
    * @param data - The input data adhering to the schema.
-   * @returns The rendered template string.
+   * @returns An object containing the rendered template string and metadata.
    */
-  build(data: z.input<TSchema>): string {
+  build(data: z.input<TSchema>): PromptTemplateBuildResult<TSchema> {
     const result = this.schema.parse(data);
-    return this.compiledTemplate(result);
+    const prompt = this.compiledTemplate(result);
+    return {
+      prompt,
+      metadata: {
+        ...this.options.metadata,
+        templateStr: this.templateStr,
+        data: result,
+      },
+    };
   }
 
   /**
    * Asynchronously builds the final template string by validating and processing the input data.
    *
    * @param data - The input data adhering to the schema.
-   * @returns A promise that resolves to the rendered template string.
+   * @returns A promise that resolves to an object containing the rendered template string and metadata.
    */
-  async buildAsync(data: z.input<TSchema>): Promise<string> {
+  async buildAsync(
+    data: z.input<TSchema>,
+  ): PromptTemplateBuildResultAsync<TSchema> {
     const result = await this.schema.parseAsync(data);
-    return this.compiledTemplate(result);
+    const prompt = this.compiledTemplate(result);
+    return {
+      prompt,
+      metadata: {
+        ...this.options.metadata,
+        templateStr: this.templateStr,
+        data: result,
+      },
+    };
   }
 
   /**

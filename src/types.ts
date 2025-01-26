@@ -10,9 +10,24 @@ export type DeepPartial<T> = {
 };
 
 /**
+ * Metadata associated with a PromptTemplate.
+ */
+export type PromptMetadata<TSchema extends ZodTypeAny> = {
+  templateId?: string;
+  experimentId?: string;
+  version?: string;
+  description?: string;
+  custom?: Record<string, any>;
+  type: "partial" | "full";
+  templateStr: string;
+  data: z.output<TSchema>;
+};
+
+/**
  *  Configuration options for a PromptTemplate instance.
  */
-export type PromptTemplateOptions = {
+export type PromptTemplateOptions<TSchema extends ZodTypeAny> = {
+  metadata: Omit<PromptMetadata<TSchema>, "templateStr" | "data">;
   helpers?: Record<string, HelperDelegate>;
 };
 
@@ -26,13 +41,26 @@ type PromptTemplateSchema<T extends PromptTemplate<ZodTypeAny>> =
  * Utility type that infers the *input* type of a PromptTemplate.
  * Essentially the same as `z.input<TSchema>`.
  */
-export type PromptTemplateInput<T extends PromptTemplate<ZodTypeAny>> = z.input<
-  PromptTemplateSchema<T>
->;
+export type PromptTemplateDataInput<T extends PromptTemplate<ZodTypeAny>> =
+  z.input<PromptTemplateSchema<T>>;
 
 /**
  * Utility type that infers the *output* type of a PromptTemplate.
  * Essentially the same as `z.output<TSchema>`.
  */
-export type PromptTemplateOutput<T extends PromptTemplate<ZodTypeAny>> =
+export type PromptTemplateDataOutput<T extends PromptTemplate<ZodTypeAny>> =
   z.output<PromptTemplateSchema<T>>;
+
+/**
+ * The result of a PromptTemplate build operation.
+ */
+export type PromptTemplateBuildResult<TSchema extends ZodTypeAny> = {
+  prompt: string;
+  metadata: PromptMetadata<TSchema>;
+};
+
+/**
+ * The result of a PromptTemplate build operation, returned asynchronously.
+ */
+export type PromptTemplateBuildResultAsync<TSchema extends ZodTypeAny> =
+  Promise<PromptTemplateBuildResult<TSchema>>;

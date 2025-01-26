@@ -2,7 +2,10 @@ import { z } from "zod";
 import { expectNotType, expectType } from "tsd";
 
 import { promptTemplate } from "../../src/index";
-import { PromptTemplateInput, PromptTemplateOutput } from "../../src/types";
+import {
+  PromptTemplateDataInput,
+  PromptTemplateDataOutput,
+} from "../../src/types";
 
 const myTemplate = promptTemplate(
   z.object({
@@ -12,10 +15,10 @@ const myTemplate = promptTemplate(
   "Hello {{name}}, you are {{age}} years old!",
 );
 
-type MyTemplateInput = PromptTemplateInput<typeof myTemplate>;
+type MyTemplateInput = PromptTemplateDataInput<typeof myTemplate>;
 expectType<{ name: string; age: number }>(null as unknown as MyTemplateInput);
 
-type MyTemplateOutput = PromptTemplateOutput<typeof myTemplate>;
+type MyTemplateOutput = PromptTemplateDataOutput<typeof myTemplate>;
 expectType<{ name: string; age: number }>(null as unknown as MyTemplateOutput);
 
 expectNotType<{ name: string }>(null as unknown as MyTemplateInput);

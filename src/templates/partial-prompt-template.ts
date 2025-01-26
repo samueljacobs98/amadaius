@@ -1,5 +1,10 @@
 import { z, ZodTypeAny } from "zod";
-import { DeepPartial, PromptTemplateOptions } from "../types";
+import {
+  DeepPartial,
+  PromptTemplateBuildResult,
+  PromptTemplateBuildResultAsync,
+  PromptTemplateOptions,
+} from "../types";
 import { merge } from "lodash";
 import Handlebars from "handlebars";
 
@@ -7,6 +12,7 @@ import Handlebars from "handlebars";
  * Represents a template that can be built with partial data validated against a Zod schema.
  */
 export class PartialPromptTemplate<TSchema extends ZodTypeAny> {
+  private options: PromptTemplateOptions<TSchema>;
   private hb = Handlebars.create();
   private compiledTemplate = this.hb.compile(this.templateStr.trim());
   private partialData: DeepPartial<z.input<TSchema>> = {};
@@ -21,9 +27,10 @@ export class PartialPromptTemplate<TSchema extends ZodTypeAny> {
   constructor(
     private schema: TSchema,
     private templateStr: string,
-    private options?: PromptTemplateOptions,
+    { metadata, ...options }: PromptTemplateOptions<TSchema>,
   ) {
-    if (this.options?.helpers) {
+    this.options = { metadata: { ...metadata, type: "partial" }, ...options };
+    if (this.options.helpers) {
       Object.entries(this.options.helpers).forEach(([name, helper]) => {
         this.hb.registerHelper(name, helper);
       });
@@ -33,21 +40,37 @@ export class PartialPromptTemplate<TSchema extends ZodTypeAny> {
   /**
    * Builds the final template string by validating and processing the input data.
    *
-   * @returns The rendered template string.
+   * @returns An object containing the rendered template string and metadata.
    */
-  build(): string {
+  build(): PromptTemplateBuildResult<TSchema> {
     const result = this.schema.parse(this.partialData);
-    return this.compiledTemplate(result);
+    const prompt = this.compiledTemplate(result);
+    return {
+      prompt,
+      metadata: {
+        ...this.options.metadata,
+        templateStr: this.templateStr,
+        data: result,
+      },
+    };
   }
 
   /**
    * Asynchronously builds the final template string by validating and processing the input data.
    *
-   * @returns A promise that resolves to the rendered template string.
+   * @returns A promise that resolves to an object containing the rendered template string and metadata.
    */
-  async buildAsync(): Promise<string> {
+  async buildAsync(): PromptTemplateBuildResultAsync<TSchema> {
     const result = await this.schema.parseAsync(this.partialData);
-    return this.compiledTemplate(result);
+    const prompt = this.compiledTemplate(result);
+    return {
+      prompt,
+      metadata: {
+        ...this.options.metadata,
+        templateStr: this.templateStr,
+        data: result,
+      },
+    };
   }
 
   /**
