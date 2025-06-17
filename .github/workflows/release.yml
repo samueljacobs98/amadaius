@@ -11,26 +11,30 @@ jobs:
   release:
     runs-on: ubuntu-latest
     permissions:
-      contents: write     
-      pull-requests: write 
+      contents: write
+      issues: write
+      pull-requests: write
+
     steps:
-      - name: Check out full history
+      - name: Check out code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          fetch-tags: true
 
-      - name: Set up Node.js
+      - name: Set Git user
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Use Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org/'
 
-      - name: Bump package.json & tag
-        run: |
-          # enable git tagging via npm
-          npm config set git-tag-version true
-          # bump to the version you entered
-          npm version ${{ github.event.inputs.version }}
+      - name: Bump package.json & create tag
+        run: npm version ${{ github.event.inputs.version }}
 
       - name: Push commit & tags
         run: |
@@ -58,10 +62,7 @@ jobs:
           tag_name: v${{ github.event.inputs.version }}
           release_name: v${{ github.event.inputs.version }}
           body: |
-            <!--
-              Paste your release notes here, or leave blank to draft.
-            -->
-          draft: false
-          prerelease: false
+            Release v${{ github.event.inputs.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
