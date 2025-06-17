@@ -1,5 +1,7 @@
 # Amadaius
 
+[![npm version](https://badge.fury.io/js/amadaius.svg)](https://badge.fury.io/js/amadaius)
+
 [Amadaius](https://github.com/samueljacobs98/amadaius) is a TypeScript/JavaScript library designed to simplify and streamline the process of creating text-based prompts for AI applications. By separating **data validation and transformation** and **prompt structure**, Amadaius ensures your prompts are robust, reusable, and easy to manage.
 
 Amadaius leverages:
@@ -108,16 +110,23 @@ import { promptTemplate } from "amadaius";
 import { z } from "zod";
 
 // Template references `{{topic}}`
-const myPrompt = promptTemplate(
+const pt = promptTemplate(
   z.object({ topic: z.string() }),
   "Write a story about {{topic}}!",
 );
 
 // Provide data matching the schema
-const result = myPrompt.build({ topic: "dragons" });
+const { prompt, metadata } = pt.build({ topic: "dragons" });
 
-console.log(result);
+console.log(prompt);
 // -> "Write a story about dragons!"
+
+console.log(metadata);
+// -> {
+//      type: "full",
+//      templateStr: "Write a story about {{topic}}!",
+//      data: { topic: "dragons" }
+//    }
 ```
 
 ### Validating and Transforming Data
@@ -129,7 +138,7 @@ import { promptTemplate } from "amadaius";
 import { z } from "zod";
 
 // Example of refining schema
-const userPrompt = promptTemplate(
+const pt = promptTemplate(
   z
     .object({
       id: z.string(),
@@ -142,30 +151,30 @@ const userPrompt = promptTemplate(
 );
 
 try {
-  const output = userPrompt.build({ id: "0123456789", name: "Alice" });
-  console.log(output);
+  const { prompt } = pt.build({ id: "0123456789", name: "Alice" });
+  console.log(prompt);
   // -> "Hello, Alice! Your ID is 0123456789."
-} catch (err) {
-  console.error(err);
-  // If you provide invalid data, e.g. ID is not length 10,
-  // you'll get a Zod validation error
+
+pt.build({ id: "short", name: "Invalid" }); // This will throw a Zod validation error  
+} catch (error) {
+  console.error(error);
+  // -> ZodError: User ID must be exactly 10 characters long
 }
 ```
 
 You can also transform data using Zod's `transform` method.
 
 ```typescript
-const transformSchema = z.string().transform((topic) => ({ topic })); // transforms a string into { topic }
 
-const transformPrompt = promptTemplate(
-  transformSchema,
+const pt = promptTemplate(
+   z.string().transform((topic) => ({ topic })), // transforms a string into { topic },
   "Write a story about {{topic}}!",
 );
 
 // We can pass just a string; the schema transforms it into { topic }
-const transformResult = transformPrompt.build("dinosaurs");
+const { prompt } = pt.build("dinosaurs");
 
-console.log(transformResult);
+console.log(prompt);
 // -> "Write a story about dinosaurs!"
 ```
 
@@ -178,12 +187,18 @@ import { promptTemplate } from "amadaius";
 import { z } from "zod";
 
 // Define smaller prompt templates
-const pt1 = promptTemplate(z.object({ name: z.string() }), "Hello, {{name}}!");
+const pt1 = promptTemplate(
+  z.object({ name: z.string() }),
+  "Hello, {{name}}!",
+);
 
-const pt2 = promptTemplate(z.object({ question: z.string() }), "{{question}}");
+const pt2 = promptTemplate(
+  z.object({ question: z.string() }),
+  "{{question}}",
+);
 
 // Compose them into a single prompt
-const result = promptTemplate(
+const { prompt } = promptTemplate(
   z.object({ greeting: pt1.asSchema(), request: pt2.asSchema() }),
   "{{greeting}} {{request}}",
 ).build({
@@ -191,7 +206,7 @@ const result = promptTemplate(
   request: { question: "What is your favorite color?" },
 });
 
-console.log(result);
+console.log(prompt);
 // -> "Hello, Alice! What is your favorite color?"
 ```
 
@@ -203,32 +218,36 @@ Sometimes you need to **partially apply** data to a template and fill in the res
 import { promptTemplate } from "amadaius";
 import { z } from "zod";
 
-const questionPrompt = promptTemplate(
-  z.object({
-    persona: z.string(),
-    message: z.string(),
-  }),
-  "You are {{persona}}. Respond to: {{message}}",
-);
+  const pt = promptTemplate(
+    z.object({
+      persona: z.string(),
+      message: z.string(),
+    }),
+    "You are {{persona}}. Respond to: {{message}}",
+  );
 
 // Convert to partial template
-const partialPrompt = questionPrompt.asPartial();
-
+      const partialPt = pt.asPartial();
 // Fill data in multiple steps
-partialPrompt.partial({ persona: "a knowledgeable AI librarian" });
-partialPrompt.partial({ message: "What are the best science fiction books?" });
+partialPt.partial({ persona: "a knowledgeable AI librarian" });
+partialPt.partial({
+  message: "What are the best science fiction books?",
+});
 
 // When you're ready, build the final string
-const partialResult = partialPrompt.build();
+const { prompt } = partialPt.build();
 
-console.log(partialResult);
+console.log(prompt);
 // -> "You are a knowledgeable AI librarian. Respond to: What are the best science fiction books?"
 ```
 
 You can also **copy** a `PartialPromptTemplate` to create a new instance with the same data.
 
 ```typescript
-const partialPromptCopy = partialPrompt.copy();
+const partialPtCopy = partialPt.copy();
+const { prompt: copyPrompt } = partialPtCopy.build();
+console.log(copyPrompt);
+// -> "You are a knowledgeable AI librarian. Respond to: What are the best science fiction books?"
 // partialPromptCopy shares the same partial data initially, then you can branch out
 ```
 
@@ -280,13 +299,13 @@ const pt = promptTemplate(
   },
 );
 
-pt.build({
+const { prompt } = pt.build({
   persona: "A knowledgeable librarian",
   user_message: "could you help me find a good science fiction book?",
   tone: "enthusiastic",
 });
 
-console.log(pt);
+console.log(prompt);
 // -> `You are a helpful AI assistant who always follows the persona and tone specified below.
 //     Persona: A knowledgeable librarian
 //
@@ -303,7 +322,7 @@ Amadaius supports asynchronous data transformations using `buildAsync(data)`.
 ```typescript
 import { promptTemplate } from "amadaius";
 
-const asyncPrompt = promptTemplate(
+const asyncPt = promptTemplate(
   z
     .object({
       productNumber: z.number(),
@@ -318,7 +337,7 @@ const asyncPrompt = promptTemplate(
   "Act as an expert in creating product descriptions.\n\nProduct {{productNumber}}:\n\n{{productData}}\n\nCreate a product description based on the data provided.",
 );
 
-const prompt = await asyncPrompt.buildAsync({ productNumber: 1234 });
+const { prompt } = await asyncPt.buildAsync({ productNumber: 1234 });
 
 console.log(prompt);
 // -> "Act as an expert in creating product descriptions.\n\nProduct 1234:\n\n{ ... }\n\nCreate a product description based on the data provided."
@@ -366,7 +385,7 @@ Builds the prompt string using the provided data.
 **Signature**
 
 ```typescript
-build(data: z.input<TSchema>): string;
+build(data: z.input<TSchema>): PromptTemplateBuildResult<TSchema>;
 ```
 
 **Parameters**
@@ -375,7 +394,14 @@ build(data: z.input<TSchema>): string;
 
 **Returns**
 
-- The prompt string.
+An object containing:
+
+- `prompt`: The rendered template string
+- `metadata`: Object containing:
+  - `type`: "full" | "partial"
+  - `templateStr`: Original template string
+  - `data`: The validated/transformed data
+  - Optional fields: `templateId`, `experimentId`, `version`, `description`, `custom`
 
 **Throws**
 
@@ -388,7 +414,7 @@ Builds the prompt string asynchronously using the provided data. This enables as
 **Signature**
 
 ```typescript
-async buildAsync(data: z.input<TSchema>): Promise<string>;
+async buildAsync(data: z.input<TSchema>): Promise<PromptTemplateBuildResult<TSchema>>;
 ```
 
 **Parameters**
@@ -397,7 +423,14 @@ async buildAsync(data: z.input<TSchema>): Promise<string>;
 
 **Returns**
 
-- A promise that resolves to the prompt string.
+A promise that resolves to an object containing:
+
+- `prompt`: The rendered template string
+- `metadata`: Object containing:
+  - `type`: "full" | "partial"
+  - `templateStr`: Original template string
+  - `data`: The validated/transformed data
+  - Optional fields: `templateId`, `experimentId`, `version`, `description`, `custom`
 
 **Throws**
 
@@ -419,7 +452,7 @@ asSchema(): ZodType<z.input<TSchema>, string, unknown>;
 
 #### `asPartial()`
 
-Converts the `PromptTemplate` into a `PartialPromptTemplate`, allowing you to partially apply data over multiple steps.
+Returns a `PartialPromptTemplate` based on a `PromptTemplate`, allowing you to partially apply data over multiple steps.
 
 **Signature**
 
