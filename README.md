@@ -253,8 +253,6 @@ console.log(copyPrompt);
 
 ---
 
-### Async Data Transformations
-
 ### Custom Handlebars Helpers
 
 You can add custom Handlebars helpers to your templates by passing them in the `helpers` option.
@@ -496,12 +494,19 @@ Throws Zod validation error if the partial data is not sufficient or invalid.
 **Signature**
 
 ```typescript
-build(): string;
+build(): PromptTemplateBuildResult<TSchema>;
 ```
 
 **Returns**
 
-- The prompt string.
+An object containing:
+
+- `prompt`: The rendered template string
+- `metadata`: Object containing:
+  - `type`: "partial"
+  - `templateStr`: Original template string
+  - `data`: The validated/transformed data
+  - Optional fields: `templateId`, `experimentId`, `version`, `description`, `custom`
 
 **Throws**
 
@@ -514,12 +519,19 @@ Finalises the partial data, validates it with the original schema, and compiles 
 **Signature**
 
 ```typescript
-async buildAsync(): Promise<string>;
+async buildAsync(): Promise<PromptTemplateBuildResult<TSchema>>;
 ```
 
 **Returns**
 
-- A promise that resolves to the prompt string.
+A promise that resolves to an object containing:
+
+- `prompt`: The rendered template string
+- `metadata`: Object containing:
+  - `type`: "partial"
+  - `templateStr`: Original template string
+  - `data`: The validated/transformed data
+  - Optional fields: `templateId`, `experimentId`, `version`, `description`, `custom`
 
 **Throws**
 
