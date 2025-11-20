@@ -539,7 +539,11 @@ Creates a new `PartialPromptTemplate` instance with the same partial data. Usefu
 
 ## Release Process
 
-Releases are managed through GitHub Actions. To create a new release:
+Releases are managed through two separate GitHub Actions workflows:
+
+### 1. Release Workflow
+
+The **Release** workflow handles versioning and creates the GitHub release. To create a new release:
 
 1. **Go to the Actions tab** in the GitHub repository
 2. **Select the "Release" workflow** from the left sidebar
@@ -547,22 +551,45 @@ Releases are managed through GitHub Actions. To create a new release:
 4. **Enter the version number** in semver format (e.g., `1.2.3`, `2.0.0`, `1.2.3-beta.1`)
 5. **Click "Run workflow"** to start the release process
 
-The workflow will:
+The Release workflow will:
 
 - ✅ Build and verify the project
 - ✅ Check if the version already exists (prevents duplicate releases)
 - ✅ Bump the version in `package.json` and `package-lock.json`
 - ✅ Create a git tag with the version
 - ✅ Push the changes and tag to the repository
-- ✅ Publish the package to npm
 - ✅ Create a GitHub release
+- ✅ Automatically trigger the Publish workflow
 
-**Note**: This workflow uses npm's **trusted publishing** (OIDC) for secure authentication. To set it up:
+### 2. Publish Workflow
+
+The **Publish** workflow handles publishing to npm. It runs automatically after a successful Release workflow, but can also be manually triggered if needed (e.g., if the initial publish failed due to authentication issues).
+
+The Publish workflow will:
+
+- ✅ Build and verify the package
+- ✅ Verify npm authentication
+- ✅ Publish the package to npm
+
+**To manually trigger the Publish workflow:**
+
+1. Go to the Actions tab
+2. Select the "Publish" workflow
+3. Click "Run workflow"
+4. Optionally specify a version (defaults to the version in `package.json`)
+
+**Note**: Both workflows use npm's **trusted publishing** (OIDC) for secure authentication. To set it up:
 
 1. Go to https://www.npmjs.com/settings/YOUR_USERNAME/automation
-2. Click "Add GitHub Actions" or "Add CI/CD Provider"
-3. Select this repository: `samueljacobs98/amadaius`
+2. Click "Add GitHub Actions" or "Add Trusted Publisher"
+3. Enter the following details:
+   - **Organization/User:** `samueljacobs98`
+   - **Repository:** `samueljacobs98/amadaius`
+   - **Workflow filename:** `publish.yml` (must match exactly, including case!)
+   - **Environment name:** (leave blank)
 4. Grant publish permissions
+
+⚠️ **Important:** The workflow filename must be exactly `publish.yml` for trusted publishing to work.
 
 No `NPM_TOKEN` secret is needed! Trusted publishing is more secure and future-proof than classic tokens.
 
