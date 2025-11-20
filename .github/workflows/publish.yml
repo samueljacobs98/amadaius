@@ -36,8 +36,6 @@ jobs:
         with:
           node-version: 20
           registry-url: "https://registry.npmjs.org/"
-          # Enable provenance only for trusted publishing
-          provenance: ${{ steps.auth_check.outputs.method == 'trusted' }}
 
       - name: Configure npm token (if provided as fallback)
         if: steps.auth_check.outputs.method == 'token'
