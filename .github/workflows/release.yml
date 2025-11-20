@@ -14,6 +14,7 @@ jobs:
       contents: write
       issues: write
       pull-requests: write
+      id-token: write # Required for npm trusted publishing via OIDC
 
     steps:
       - name: Check out code
@@ -33,6 +34,7 @@ jobs:
         with:
           node-version: "20.x"
           registry-url: "https://registry.npmjs.org/"
+          # Use trusted publishing (OIDC) - no token needed!
 
       - name: Install dependencies
         run: npm ci
@@ -81,10 +83,26 @@ jobs:
           git push origin HEAD:main
           git push origin --tags
 
+      - name: Verify npm authentication
+        run: |
+          echo "Verifying npm authentication via trusted publishing..."
+          npm whoami --registry=https://registry.npmjs.org/ || {
+            echo "❌ npm authentication failed!"
+            echo ""
+            echo "To set up trusted publishing:"
+            echo "1. Go to https://www.npmjs.com/settings/YOUR_USERNAME/automation"
+            echo "2. Click 'Add GitHub Actions' or 'Add CI/CD Provider'"
+            echo "3. Select this repository: ${{ github.repository }}"
+            echo "4. Grant publish permissions"
+            exit 1
+          }
+          echo "✅ npm authentication successful"
+
       - name: Publish to npm
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          echo "Publishing amadaius@${{ github.event.inputs.version }} to npm..."
+          npm publish --registry=https://registry.npmjs.org/
+          echo "✅ Successfully published to npm!"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1

@@ -557,7 +557,14 @@ The workflow will:
 - ✅ Publish the package to npm
 - ✅ Create a GitHub release
 
-**Note**: Ensure that the `NPM_TOKEN` secret is configured in the repository settings for npm publishing to work.
+**Note**: This workflow uses npm's **trusted publishing** (OIDC) for secure authentication. To set it up:
+
+1. Go to https://www.npmjs.com/settings/YOUR_USERNAME/automation
+2. Click "Add GitHub Actions" or "Add CI/CD Provider"
+3. Select this repository: `samueljacobs98/amadaius`
+4. Grant publish permissions
+
+No `NPM_TOKEN` secret is needed! Trusted publishing is more secure and future-proof than classic tokens.
 
 ---
 
