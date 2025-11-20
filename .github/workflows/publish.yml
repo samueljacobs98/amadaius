@@ -14,13 +14,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    if: |
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
-      github.event_name == 'workflow_dispatch'
     permissions:
       contents: read
       id-token: write
-      packages: write
 
     steps:
       - uses: actions/checkout@v4
@@ -29,23 +25,22 @@ jobs:
         with:
           node-version: 20
           registry-url: "https://registry.npmjs.org/"
+          provenance: true
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
+      - run: npm run build
+      - run: npm pack --dry-run
 
-      - name: Build
-        run: npm run build
+      - name: Determine version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION=$(node -p "require('./package.json').version")
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Publishing version ${VERSION}"
 
-      - name: Verify npm package
-        run: npm pack --dry-run
-
-      - name: Import npm token (OIDC)
-        id: npm_token
-        uses: npm/cli-action@v3
-        with:
-          oidc: true
-
-      - name: Publish
-        env:
-          NODE_AUTH_TOKEN: ${{ steps.npm_token.outputs.token }}
-        run: npm publish --provenance --access=public
+      - name: Publish to npm (Trusted Publishing)
+        run: npm publish --provenance --access public
