@@ -47,8 +47,9 @@ Amadaius leverages:
      - [`build()`](#build)
      - [`buildAsync()`](#buildasync)
      - [`copy()`](#copy)
-6. [Contributing](#contributing)
-7. [License](#license)
+6. [Release Process](#release-process)
+7. [Contributing](#contributing)
+8. [License](#license)
 
 ---
 
@@ -155,7 +156,7 @@ try {
   console.log(prompt);
   // -> "Hello, Alice! Your ID is 0123456789."
 
-pt.build({ id: "short", name: "Invalid" }); // This will throw a Zod validation error  
+  pt.build({ id: "short", name: "Invalid" }); // This will throw a Zod validation error
 } catch (error) {
   console.error(error);
   // -> ZodError: User ID must be exactly 10 characters long
@@ -165,9 +166,8 @@ pt.build({ id: "short", name: "Invalid" }); // This will throw a Zod validation 
 You can also transform data using Zod's `transform` method.
 
 ```typescript
-
 const pt = promptTemplate(
-   z.string().transform((topic) => ({ topic })), // transforms a string into { topic },
+  z.string().transform((topic) => ({ topic })), // transforms a string into { topic },
   "Write a story about {{topic}}!",
 );
 
@@ -187,15 +187,9 @@ import { promptTemplate } from "amadaius";
 import { z } from "zod";
 
 // Define smaller prompt templates
-const pt1 = promptTemplate(
-  z.object({ name: z.string() }),
-  "Hello, {{name}}!",
-);
+const pt1 = promptTemplate(z.object({ name: z.string() }), "Hello, {{name}}!");
 
-const pt2 = promptTemplate(
-  z.object({ question: z.string() }),
-  "{{question}}",
-);
+const pt2 = promptTemplate(z.object({ question: z.string() }), "{{question}}");
 
 // Compose them into a single prompt
 const { prompt } = promptTemplate(
@@ -218,16 +212,16 @@ Sometimes you need to **partially apply** data to a template and fill in the res
 import { promptTemplate } from "amadaius";
 import { z } from "zod";
 
-  const pt = promptTemplate(
-    z.object({
-      persona: z.string(),
-      message: z.string(),
-    }),
-    "You are {{persona}}. Respond to: {{message}}",
-  );
+const pt = promptTemplate(
+  z.object({
+    persona: z.string(),
+    message: z.string(),
+  }),
+  "You are {{persona}}. Respond to: {{message}}",
+);
 
 // Convert to partial template
-      const partialPt = pt.asPartial();
+const partialPt = pt.asPartial();
 // Fill data in multiple steps
 partialPt.partial({ persona: "a knowledgeable AI librarian" });
 partialPt.partial({
@@ -540,6 +534,30 @@ A promise that resolves to an object containing:
 #### `copy()`
 
 Creates a new `PartialPromptTemplate` instance with the same partial data. Useful for creating branches from a partially-applied template without interfering with each other's data.
+
+---
+
+## Release Process
+
+Releases are managed through GitHub Actions. To create a new release:
+
+1. **Go to the Actions tab** in the GitHub repository
+2. **Select the "Release" workflow** from the left sidebar
+3. **Click "Run workflow"** and select the branch (usually `main`)
+4. **Enter the version number** in semver format (e.g., `1.2.3`, `2.0.0`, `1.2.3-beta.1`)
+5. **Click "Run workflow"** to start the release process
+
+The workflow will:
+
+- ✅ Build and verify the project
+- ✅ Check if the version already exists (prevents duplicate releases)
+- ✅ Bump the version in `package.json` and `package-lock.json`
+- ✅ Create a git tag with the version
+- ✅ Push the changes and tag to the repository
+- ✅ Publish the package to npm
+- ✅ Create a GitHub release
+
+**Note**: Ensure that the `NPM_TOKEN` secret is configured in the repository settings for npm publishing to work.
 
 ---
 

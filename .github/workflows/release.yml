@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to release (semver), e.g. 1.2.2'
+        description: "Version to release (semver), e.g. 1.2.2"
         required: true
 
 jobs:
@@ -17,10 +17,11 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           fetch-tags: true
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set Git user
         run: |
@@ -28,28 +29,57 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Use Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          registry-url: 'https://registry.npmjs.org/'
+          node-version: "20.x"
+          registry-url: "https://registry.npmjs.org/"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify npm package
+        run: npm pack --dry-run
+
+      - name: Check if version already exists
+        id: check_version
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          if npm view amadaius@${VERSION} version > /dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Version ${VERSION} already exists on npm!"
+            exit 1
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Version ${VERSION} is available"
+          fi
+
+      - name: Check if tag already exists
+        id: check_tag
+        run: |
+          TAG="v${{ github.event.inputs.version }}"
+          if git rev-parse "$TAG" >/dev/null 2>&1 || git ls-remote --tags origin "$TAG" | grep -q "$TAG"; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Tag ${TAG} already exists!"
+            exit 1
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Tag ${TAG} is available"
+          fi
 
       - name: Bump package.json & create tag
-        run: npm version ${{ github.event.inputs.version }}
+        run: |
+          npm version ${{ github.event.inputs.version }} --no-git-tag-version
+          git add package.json package-lock.json
+          git commit -m "chore: release v${{ github.event.inputs.version }}"
+          git tag -a "v${{ github.event.inputs.version }}" -m "Release v${{ github.event.inputs.version }}"
 
       - name: Push commit & tags
         run: |
           git push origin HEAD:main
           git push origin --tags
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Install dependencies & build
-        run: |
-          npm ci
-          npm run build
-
-      - name: Verify npm package
-        run: npm pack --dry-run
 
       - name: Publish to npm
         run: npm publish
@@ -57,12 +87,13 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ github.event.inputs.version }}
-          release_name: v${{ github.event.inputs.version }}
+          name: v${{ github.event.inputs.version }}
           body: |
             Release v${{ github.event.inputs.version }}
+          draft: false
+          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
