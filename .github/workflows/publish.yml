@@ -21,30 +21,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check authentication method
-        id: auth_check
-        run: |
-          if [ -n "${{ secrets.NPM_TOKEN }}" ]; then
-            echo "method=token" >> $GITHUB_OUTPUT
-            echo "Using NPM_TOKEN for authentication"
-          else
-            echo "method=trusted" >> $GITHUB_OUTPUT
-            echo "Using trusted publishing (OIDC)"
-          fi
-
-      - uses: actions/setup-node@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: "https://registry.npmjs.org/"
-
-      - name: Configure npm token (if provided as fallback)
-        if: steps.auth_check.outputs.method == 'token'
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-          npm config set registry https://registry.npmjs.org/
-          npm whoami
+          registry-url: https://registry.npmjs.org/
+          always-auth: true
 
       - run: npm ci
       - run: npm run build
@@ -61,15 +43,6 @@ jobs:
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Publishing version ${VERSION}"
 
-      - name: Verify npm authentication
-        run: |
-          if ! npm whoami; then
-            echo "Error: Not authenticated to npm"
-            echo "Set NPM_TOKEN secret in GitHub repository settings"
-            exit 1
-          fi
-          echo "✓ Authenticated as: $(npm whoami)"
-
       - name: Check if package exists
         run: |
           if npm view amadaius@$(node -p "require('./package.json').version") version > /dev/null 2>&1; then
@@ -78,10 +51,5 @@ jobs:
             echo "✓ Version is available for publishing"
           fi
 
-      - name: Publish to npm
-        run: |
-          if [ "${{ steps.auth_check.outputs.method }}" == "token" ]; then
-            npm publish --access public
-          else
-            npm publish --provenance --access public
-          fi
+      - name: Publish to npm using trusted publishing
+        run: npm publish --provenance --access public
