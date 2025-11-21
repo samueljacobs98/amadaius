@@ -21,29 +21,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check authentication method
-        id: auth_check
-        run: |
-          if [ -n "${{ secrets.NPM_TOKEN }}" ]; then
-            echo "method=token" >> $GITHUB_OUTPUT
-            echo "Using NPM_TOKEN for authentication"
-          else
-            echo "method=trusted" >> $GITHUB_OUTPUT
-            echo "Using trusted publishing (OIDC)"
-          fi
-
-      - uses: actions/setup-node@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: "https://registry.npmjs.org/"
+          registry-url: https://registry.npmjs.org/
+          always-auth: true
 
-      - name: Configure npm token (if provided as fallback)
-        if: steps.auth_check.outputs.method == 'token'
+      - name: Configure npm token (optional)
+        if: ${{ secrets.NPM_TOKEN != '' }}
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-          npm config set registry https://registry.npmjs.org/
           npm whoami
 
       - run: npm ci
@@ -61,27 +51,23 @@ jobs:
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Publishing version ${VERSION}"
 
-      - name: Verify npm authentication
-        run: |
-          if ! npm whoami; then
-            echo "Error: Not authenticated to npm"
-            echo "Set NPM_TOKEN secret in GitHub repository settings"
-            exit 1
-          fi
-          echo "✓ Authenticated as: $(npm whoami)"
-
       - name: Check if package exists
         run: |
-          if npm view amadaius@$(node -p "require('./package.json').version") version > /dev/null 2>&1; then
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          if npm view amadaius@${PACKAGE_VERSION} version > /dev/null 2>&1; then
             echo "Warning: This version already exists on npm"
           else
             echo "✓ Version is available for publishing"
           fi
 
       - name: Publish to npm
+        env:
+          USE_TOKEN: ${{ secrets.NPM_TOKEN != '' }}
         run: |
-          if [ "${{ steps.auth_check.outputs.method }}" == "token" ]; then
-            npm publish --access public
+          if [ "${USE_TOKEN}" = "true" ]; then
+            echo "Publishing with NPM_TOKEN"
+            npm publish --access public --registry https://registry.npmjs.org/
           else
-            npm publish --provenance --access public
+            echo "Publishing with trusted publishing (OIDC)"
+            npm publish --provenance --access public --registry https://registry.npmjs.org/
           fi
