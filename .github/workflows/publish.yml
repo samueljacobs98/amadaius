@@ -52,4 +52,6 @@ jobs:
           fi
 
       - name: Publish to npm using trusted publishing
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --provenance --access public
