@@ -1,46 +1,159 @@
 name: CI
 
 on:
+  pull_request:
+    types: [opened, synchronize]
   push:
     branches: ["main"]
-  pull_request:
-    branches: ["main"]
+  merge_group:
+
+env:
+  NODE_OPTIONS: "--max-old-space-size=6144"
+  TURBO_SCM_BASE: origin/main
+
+permissions:
+  contents: read
 
 jobs:
-  build-and-test:
+  build:
+    name: Build monorepo
+    timeout-minutes: 30
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
-
-      - name: Use Node
-        uses: actions/setup-node@v3
+        uses: actions/checkout@v4
         with:
-          node-version: 20
+          filter: "blob:none"
+          fetch-depth: 0
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
         with:
-          version: 10.23.0
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}-build
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Cache turbo remote cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules/.cache/turbo
+            .turbo
+          key: ${{ runner.os }}-turbo-remote-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-remote-
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: "package.json"
+
+      - uses: pnpm/action-setup@v3
 
       - name: Install dependencies
         run: pnpm install
 
-      - name: Lint
-        run: pnpm lint
-
-      - name: Test
-        run: pnpm test:coverage
-
       - name: Build
-        run: pnpm build
+        run: pnpm build --affected --concurrency=50% --force
 
-      - name: Test types
-        run: pnpm test:types
+      - uses: ./.github/actions/assertions/assert-no-git-diffs
 
-      - name: Upload coverage
-        uses: actions/upload-artifact@v4
+  unit_test:
+    name: Unit tests
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
         with:
-          name: coverage-report
-          path: coverage/
+          filter: "blob:none"
+          fetch-depth: 0
+
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}-test
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Cache turbo remote cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules/.cache/turbo
+            .turbo
+          key: ${{ runner.os }}-turbo-remote-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-remote-
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: "package.json"
+
+      - uses: pnpm/action-setup@v3
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Test with coverage
+        run: pnpm test:coverage --affected --concurrency=50%
+
+      - name: Test Types
+        run: pnpm test:types --affected --concurrency=50%
+
+  lint_and_format:
+    name: Lint & Format
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          filter: "blob:none"
+          fetch-depth: 0
+
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}-lint
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Cache turbo remote cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules/.cache/turbo
+            .turbo
+          key: ${{ runner.os }}-turbo-remote-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-remote-
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: "package.json"
+
+      - uses: pnpm/action-setup@v3
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build (to generate types)
+        run: pnpm build --affected --concurrency=50% --force
+
+      - name: Type Check
+        run: pnpm typecheck --affected
+
+      - name: Lint
+        run: pnpm lint --affected
+
+      - name: Format Check
+        run: pnpm format --affected

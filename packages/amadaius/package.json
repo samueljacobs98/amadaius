@@ -33,7 +33,7 @@
     "build": "tsc -p tsconfig.json",
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "test:types": "tsd -f test/test-d",
+    "test:types": "pnpm build && tsd -f test/test-d",
     "typecheck": "tsc --noEmit",
     "format:check": "prettier --check './src/**/*.{ts,js,json,md}'",
     "format:fix": "prettier --write './src/**/*.{ts,js,json,md}'"

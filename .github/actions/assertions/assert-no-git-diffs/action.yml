@@ -1,0 +1,18 @@
+name: "Assert No Git Diffs"
+description: "Assert that the git working directory is clean"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Format code to prevent formatting errors from causing false positives
+      run: pnpm format
+      shell: bash
+
+    - name: Assert that the git working directory is clean
+      shell: bash
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then 
+          git status
+          echo "Git working directory is dirty - see above for details! Breaking the build!"
+          exit 1
+        fi
