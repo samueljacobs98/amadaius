@@ -94,6 +94,9 @@ Use the `asSchema` method to compose smaller prompt templates into larger, more 
 ```bash
 # Using pnpm
 pnpm add amadaius
+
+# Using npm
+npm install amadaius
 ```
 
 ---

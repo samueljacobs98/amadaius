@@ -93,7 +93,7 @@ We use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) to
 **Run Lint**:
 
 ```bash
-pnpm run lint
+pnpm lint
 ```
 
 Make sure there are no errors before pushing your changes.
@@ -101,13 +101,13 @@ Make sure there are no errors before pushing your changes.
 **Formatting**: We use Prettier to format code. Run the following command to format your code:
 
 ```bash
-pnpm run format:check
+pnpm format:check
 ```
 
 To automatically format files, run:
 
 ```bash
-pnpm run format:fix
+pnpm format:fix
 ```
 
 ---
