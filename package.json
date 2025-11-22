@@ -25,7 +25,7 @@
     "typescript-eslint": "catalog:"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=20"
   },
   "repository": "https://github.com/samueljacobs98/amadaius"
 }
