@@ -50,7 +50,7 @@ jobs:
       - name: Verify npm package
         run: |
           PACK_DIR=$(mktemp -d)
-          pnpm pack --pack-destination "$PACK_DIR"
+          pnpm --filter amadaius pack --pack-destination "$PACK_DIR"
           ls "$PACK_DIR"
 
       - name: Check if version already exists
@@ -81,8 +81,8 @@ jobs:
 
       - name: Bump package.json & create tag
         run: |
-          pnpm version ${{ github.event.inputs.version }} --no-git-tag-version
-          git add package.json
+          pnpm --filter amadaius version ${{ github.event.inputs.version }} --no-git-tag-version
+          git add packages/amadaius/package.json
           if [ -f pnpm-lock.yaml ]; then
             git add pnpm-lock.yaml
           fi
