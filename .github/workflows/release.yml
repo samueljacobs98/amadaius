@@ -81,7 +81,7 @@ jobs:
 
       - name: Bump package.json & create tag
         run: |
-          pnpm --filter amadaius version ${{ github.event.inputs.version }} --no-git-tag-version
+          pnpm -r --filter amadaius version ${{ github.event.inputs.version }} --no-git-tag-version
           git add packages/amadaius/package.json
           if [ -f pnpm-lock.yaml ]; then
             git add pnpm-lock.yaml
