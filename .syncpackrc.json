@@ -1,0 +1,57 @@
+{
+  "$schema": "https://unpkg.com/syncpack@13/schema.json",
+  "source": ["package.json", "apps/*/package.json", "packages/*/package.json"],
+
+  "dependencyTypes": ["prod", "dev", "peer"],
+
+  "versionGroups": [
+    {
+      "label": "Follow pnpm catalog for shared deps",
+      "dependencies": [
+        "react",
+        "react-dom",
+        "next",
+        "postcss",
+        "tailwindcss",
+        "@tailwindcss/postcss",
+        "@types/react",
+        "@types/react-dom",
+        "@types/node",
+        "@types/mdx",
+        "eslint",
+        "typescript",
+        "typescript-eslint"
+      ],
+      "pinVersion": "catalog:"
+    },
+    {
+      "label": "Always use workspace:* for local packages",
+      "dependencies": ["$LOCAL"],
+      "dependencyTypes": ["prod", "dev", "peer"],
+      "pinVersion": "workspace:*"
+    },
+    {
+      "label": "Ignore non-semver specifiers (catalog:, workspace:, file:, git, link, etc.)",
+      "isIgnored": true,
+      "specifierTypes": ["!version", "!range"]
+    }
+  ],
+
+  "semverGroups": [
+    {
+      "label": "Ignore semver-range style for non-semver specifiers (incl. catalog:)",
+      "isIgnored": true,
+      "specifierTypes": ["!version", "!range"]
+    },
+    {
+      "label": "Prefer exact versions in prod (optional)",
+      "dependencyTypes": ["prod"],
+      "range": ""
+    },
+    {
+      "label": "Prefer caret in dev (optional)",
+      "dependencyTypes": ["dev"],
+      "range": "^"
+    }
+  ]
+}
