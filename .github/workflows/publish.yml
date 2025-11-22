@@ -36,6 +36,9 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           cache: 'pnpm'
 
+      - name: Upgrade npm
+        run: npm install -g npm@latest
+
       - name: Determine version to publish
         id: version
         run: |
@@ -77,6 +80,4 @@ jobs:
         run: pnpm test
 
       - name: Publish package
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: pnpm publish --access public --provenance --no-git-checks
+        run: npm publish
