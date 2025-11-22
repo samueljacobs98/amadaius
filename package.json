@@ -2,6 +2,7 @@
   "name": "amadaius-workspace",
   "devDependencies": {
     "@eslint/js": "9.34.0",
+    "@manypkg/cli": "0.25.1",
     "@trivago/prettier-plugin-sort-imports": "5.2.2",
     "husky": "^9.1.7",
     "prettier": "3.6.2",
@@ -27,6 +28,9 @@
     "format:check": "turbo run format:check --cache-dir=.turbo",
     "format:fix": "turbo run format:fix --cache-dir=.turbo",
     "lint": "turbo run lint",
+    "manypkg": "manypkg check",
+    "manypkg:fix": "manypkg fix",
+    "postinstall": "manypkg check",
     "prepare": "husky",
     "test": "turbo run test --cache-dir=.turbo",
     "test:coverage": "turbo run test:coverage --cache-dir=.turbo",

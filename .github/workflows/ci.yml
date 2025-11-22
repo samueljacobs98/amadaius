@@ -15,6 +15,37 @@ permissions:
   contents: read
 
 jobs:
+  manypkg:
+    name: Manypkg checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+
+      - name: Run manypkg check
+        run: pnpm dlx @manypkg/cli@0.25.1 check
+
+      - name: Assert no manifest diffs after manypkg
+        shell: bash
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git status
+            echo "package.json changes detected (manypkg would fix). Failing."
+            exit 1
+          fi
   syncpack:
     name: Syncpack dependency checks
     runs-on: ubuntu-latest

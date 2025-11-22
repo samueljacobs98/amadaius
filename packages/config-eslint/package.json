@@ -17,5 +17,6 @@
     "./base": "./base.js"
   },
   "private": true,
+  "repository": "https://github.com/samueljacobs98/amadaius/tree/main/packages/config-eslint",
   "type": "module"
 }
