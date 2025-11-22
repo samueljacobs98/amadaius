@@ -1,5 +1,6 @@
-import { z, ZodTypeAny } from "zod";
-import {
+import type { z } from "zod";
+import { type ZodTypeAny } from "zod";
+import type {
   DeepPartial,
   PromptTemplateBuildResult,
   PromptTemplateBuildResultAsync,
@@ -14,8 +15,9 @@ import Handlebars from "handlebars";
 export class PartialPromptTemplate<TSchema extends ZodTypeAny> {
   private options: PromptTemplateOptions<TSchema>;
   private hb = Handlebars.create();
-  private compiledTemplate = this.hb.compile(this.templateStr.trim());
   private partialData: DeepPartial<z.input<TSchema>> = {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private compiledTemplate: HandlebarsTemplateDelegate<any>;
 
   /**
    * Constructs a new PartialPromptTemplate.
@@ -29,6 +31,7 @@ export class PartialPromptTemplate<TSchema extends ZodTypeAny> {
     private templateStr: string,
     { metadata, ...options }: PromptTemplateOptions<TSchema>,
   ) {
+    this.compiledTemplate = this.hb.compile(this.templateStr);
     this.options = { metadata: { ...metadata, type: "partial" }, ...options };
     if (this.options.helpers) {
       Object.entries(this.options.helpers).forEach(([name, helper]) => {

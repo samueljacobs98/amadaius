@@ -51,7 +51,7 @@ jobs:
           elif [ "${{ github.event_name }}" = "push" ]; then
             VERSION="${GITHUB_REF_NAME#v}"
           else
-            VERSION=$(pnpm pkg get version | tr -d '"')
+            VERSION=$(pnpm --filter amadaius pkg get version | tr -d '"')
           fi
 
           if [ -z "$VERSION" ]; then
@@ -64,20 +64,21 @@ jobs:
 
       - name: Align package version
         run: |
-          CURRENT=$(node -p "require('./package.json').version")
+          CURRENT=$(node -p "require('./packages/amadaius/package.json').version")
           TARGET="${{ steps.version.outputs.version }}"
           if [ "$CURRENT" != "$TARGET" ]; then
-            pnpm version "$TARGET" --no-git-tag-version
+            pnpm --filter amadaius version "$TARGET" --no-git-tag-version
           fi
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build package
-        run: pnpm build
+        run: pnpm --filter amadaius build
 
       - name: Run tests
-        run: pnpm test
+        run: pnpm --filter amadaius test
 
       - name: Publish package
+        working-directory: ./packages/amadaius
         run: npm publish

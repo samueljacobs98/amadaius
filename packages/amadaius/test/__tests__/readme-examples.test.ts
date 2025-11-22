@@ -119,8 +119,9 @@ describe("README Examples", () => {
             ) => {
               switch (tone) {
                 case "formal":
-                  return `Good day. I would like to bring to your attention: ${message.charAt(0).toUpperCase() + message.slice(1)
-                    }.`;
+                  return `Good day. I would like to bring to your attention: ${
+                    message.charAt(0).toUpperCase() + message.slice(1)
+                  }.`;
                 case "casual":
                   return `Hey! So basically: ${message}`;
                 case "enthusiastic":
