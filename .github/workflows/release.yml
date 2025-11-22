@@ -48,7 +48,10 @@ jobs:
         run: pnpm run build
 
       - name: Verify npm package
-        run: pnpm pack --dry-run
+        run: |
+          PACK_DIR=$(mktemp -d)
+          pnpm pack --pack-destination "$PACK_DIR"
+          ls "$PACK_DIR"
 
       - name: Check if version already exists
         id: check_version
