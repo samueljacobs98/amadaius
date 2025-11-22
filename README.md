@@ -16,6 +16,6 @@ Run workspace tasks with pnpm from the repository root:
 - `pnpm lint` – run lint tasks via Turborepo
 - `pnpm test` – run tests (after building dependencies)
 - `pnpm build` – build all packages
-- `pnpm format` – run format checks
+- `pnpm format:check` – run format checks
 
 For package-specific instructions, see the README inside each package directory.
