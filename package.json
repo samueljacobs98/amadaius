@@ -1,25 +1,12 @@
 {
   "name": "amadaius-workspace",
-  "private": true,
-  "packageManager": "pnpm@10.23.0",
-  "scripts": {
-    "lint": "turbo run lint",
-    "build": "turbo run build",
-    "prepare": "husky",
-    "test": "turbo run test --cache-dir=.turbo",
-    "test:coverage": "turbo run test:coverage --cache-dir=.turbo",
-    "test:types": "turbo run test:types --cache-dir=.turbo",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "format:check": "turbo run format:check --cache-dir=.turbo",
-    "format:fix": "turbo run format:fix --cache-dir=.turbo",
-    "typecheck": "turbo run typecheck --cache-dir=.turbo"
-  },
   "devDependencies": {
     "@eslint/js": "9.34.0",
-    "husky": "^9.1.7",
     "@trivago/prettier-plugin-sort-imports": "5.2.2",
+    "husky": "^9.1.7",
     "prettier": "3.6.2",
     "prettier-plugin-tailwindcss": "0.7.0",
+    "syncpack": "13.0.4",
     "turbo": "2.5.8",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:"
@@ -27,5 +14,23 @@
   "engines": {
     "node": ">=20"
   },
-  "repository": "https://github.com/samueljacobs98/amadaius"
+  "packageManager": "pnpm@10.23.0",
+  "private": true,
+  "repository": "https://github.com/samueljacobs98/amadaius",
+  "scripts": {
+    "build": "turbo run build",
+    "deps:fix": "syncpack fix-mismatches && syncpack set-semver-ranges && syncpack format",
+    "deps:lint": "syncpack lint && syncpack lint-semver-ranges",
+    "deps:list": "syncpack list --show summary",
+    "deps:update": "syncpack update",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "format:check": "turbo run format:check --cache-dir=.turbo",
+    "format:fix": "turbo run format:fix --cache-dir=.turbo",
+    "lint": "turbo run lint",
+    "prepare": "husky",
+    "test": "turbo run test --cache-dir=.turbo",
+    "test:coverage": "turbo run test:coverage --cache-dir=.turbo",
+    "test:types": "turbo run test:types --cache-dir=.turbo",
+    "typecheck": "turbo run typecheck --cache-dir=.turbo"
+  }
 }
