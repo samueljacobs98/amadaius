@@ -1,6 +1,6 @@
-import { HelperDelegate } from "handlebars";
-import { PromptTemplate } from "./templates/prompt-template";
-import { z, ZodTypeAny } from "zod";
+import type { HelperDelegate } from "handlebars";
+import type { PromptTemplate } from "./templates/prompt-template";
+import type { z, ZodTypeAny } from "zod";
 
 /**
  * Converts a type to a type where all properties are optional.
@@ -17,6 +17,7 @@ export type PromptMetadata<TSchema extends ZodTypeAny> = {
   experimentId?: string;
   version?: string;
   description?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   custom?: Record<string, any>;
   type: "partial" | "full";
   templateStr: string;

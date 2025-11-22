@@ -3,12 +3,29 @@
   "private": true,
   "packageManager": "pnpm@10.23.0",
   "scripts": {
-    "lint": "turbo lint",
-    "build": "turbo build",
-    "test": "turbo test",
-    "format": "turbo format"
+    "lint": "turbo run lint",
+    "build": "turbo run build",
+    "prepare": "husky",
+    "test": "turbo run test --cache-dir=.turbo",
+    "test:coverage": "turbo run test:coverage --cache-dir=.turbo",
+    "test:types": "turbo run test:types --cache-dir=.turbo",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "format:check": "turbo run format:check --cache-dir=.turbo",
+    "format:fix": "turbo run format:fix --cache-dir=.turbo",
+    "typecheck": "turbo run typecheck --cache-dir=.turbo"
   },
   "devDependencies": {
-    "turbo": "^2.2.3"
-  }
+    "@eslint/js": "9.34.0",
+    "husky": "^9.1.7",
+    "@trivago/prettier-plugin-sort-imports": "5.2.2",
+    "prettier": "3.6.2",
+    "prettier-plugin-tailwindcss": "0.7.0",
+    "turbo": "2.5.8",
+    "typescript": "catalog:",
+    "typescript-eslint": "catalog:"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "repository": "https://github.com/samueljacobs98/amadaius"
 }

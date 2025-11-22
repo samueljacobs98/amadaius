@@ -1,6 +1,6 @@
-import { z, ZodTypeAny } from "zod";
+import type { z, ZodTypeAny } from "zod";
 import Handlebars from "handlebars";
-import {
+import type {
   PromptTemplateBuildResult,
   PromptTemplateBuildResultAsync,
   PromptTemplateOptions,
@@ -13,7 +13,8 @@ import { PartialPromptTemplate } from "./partial-prompt-template";
  */
 export class PromptTemplate<TSchema extends ZodTypeAny> {
   private hb = Handlebars.create();
-  private compiledTemplate = this.hb.compile(this.templateStr.trim());
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private compiledTemplate: HandlebarsTemplateDelegate<any>;
 
   /**
    * Constructs a new PromptTemplate.
@@ -27,6 +28,7 @@ export class PromptTemplate<TSchema extends ZodTypeAny> {
     private templateStr: string,
     private options: PromptTemplateOptions<TSchema>,
   ) {
+    this.compiledTemplate = this.hb.compile(this.templateStr.trim());
     if (this.options.helpers) {
       Object.entries(this.options.helpers).forEach(([name, helper]) => {
         this.hb.registerHelper(name, helper);

@@ -1,5 +1,5 @@
-import { ZodTypeAny } from "zod";
-import { PromptTemplateOptions } from "./types";
+import type { ZodTypeAny } from "zod";
+import type { PromptTemplateOptions } from "./types";
 import { PromptTemplate } from "./templates/prompt-template";
 
 export * from "./types";
