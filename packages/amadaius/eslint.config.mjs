@@ -9,7 +9,7 @@ import jestPlugin from "eslint-plugin-jest";
 
 export default [
   {
-    ignores: ["jest.config.js", "eslint.config.mjs"],
+    ignores: ["jest.config.js", "eslint.config.mjs", "dist/**"],
   },
   eslint.configs.recommended,
   {
