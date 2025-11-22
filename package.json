@@ -11,7 +11,7 @@
     "LICENSE"
   ],
   "license": "MIT",
-  "packageManager": "pnpm@10.13.1",
+  "packageManager": "pnpm@10.23.0",
   "save-exact": true,
   "homepage": "https://github.com/samueljacobs98/amadaius#readme",
   "repository": {
@@ -31,7 +31,8 @@
   "scripts": {
     "lint": "eslint './src/**/*.{js,ts}'",
     "build": "tsc -p tsconfig.json",
-    "test": "jest --coverage",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
     "test:types": "tsd -f test/test-d",
     "format:check": "prettier --check './src/**/*.{ts,js,json,md}'",
     "format:fix": "prettier --write './src/**/*.{ts,js,json,md}'",

@@ -120,7 +120,13 @@ We use Jest for testing. Run the following command to run tests:
 pnpm test
 ```
 
-This command will also generate a coverage report in the `coverage` directory by default.
+To run tests with coverage, use:
+
+```bash
+pnpm test:coverage
+```
+
+This command will run the tests and generate a coverage report in the `coverage` directory by default.
 
 Please ensure that:
 
