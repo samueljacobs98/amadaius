@@ -91,8 +91,6 @@ export function promptTemplate<TSchema extends ZodTypeAny>(
 ): PromptTemplate<TSchema> {
   return new PromptTemplate(schema, templateStr, {
     ...options,
-    metadata: options.metadata
-      ? { ...options.metadata, type: "full" }
-      : { type: "full" },
+    metadata: { ...options.metadata, type: "full" },
   });
 }
