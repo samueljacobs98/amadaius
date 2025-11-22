@@ -92,8 +92,8 @@ Use the `asSchema` method to compose smaller prompt templates into larger, more 
 ## Installation
 
 ```bash
-# Using npm
-npm install amadaius
+# Using pnpm
+pnpm add amadaius
 ```
 
 ---
@@ -555,7 +555,7 @@ The Release workflow will:
 
 - ✅ Build and verify the project
 - ✅ Check if the version already exists (prevents duplicate releases)
-- ✅ Bump the version in `package.json` and `package-lock.json`
+- ✅ Bump the version in `package.json` and `pnpm-lock.yaml`
 - ✅ Create a git tag with the version
 - ✅ Push the changes and tag to the repository
 - ✅ Create a GitHub release
@@ -563,7 +563,7 @@ The Release workflow will:
 
 ### 2. Publish Workflow
 
-The **Publish** workflow handles publishing to npm. It runs automatically after a successful Release workflow, but can also be manually triggered if needed (e.g., if the initial publish failed due to authentication issues).
+The **Publish** workflow handles publishing to npm. It runs automatically after a successful Release workflow, but can also be manually triggered if needed (e.g., if the initial publish failed due to authentication issues). The workflow uses pnpm to install dependencies, build, test, and publish the package.
 
 The Publish workflow will:
 

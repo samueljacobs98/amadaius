@@ -36,20 +36,25 @@ jobs:
           registry-url: "https://registry.npmjs.org/"
           # Use trusted publishing (OIDC) - no token needed!
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.13.1
+
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install
 
       - name: Build
-        run: npm run build
+        run: pnpm run build
 
       - name: Verify npm package
-        run: npm pack --dry-run
+        run: pnpm pack --dry-run
 
       - name: Check if version already exists
         id: check_version
         run: |
           VERSION="${{ github.event.inputs.version }}"
-          if npm view amadaius@${VERSION} version > /dev/null 2>&1; then
+          if pnpm view amadaius@${VERSION} version > /dev/null 2>&1; then
             echo "exists=true" >> $GITHUB_OUTPUT
             echo "Version ${VERSION} already exists on npm!"
             exit 1
@@ -73,8 +78,11 @@ jobs:
 
       - name: Bump package.json & create tag
         run: |
-          npm version ${{ github.event.inputs.version }} --no-git-tag-version
-          git add package.json package-lock.json
+          pnpm version ${{ github.event.inputs.version }} --no-git-tag-version
+          git add package.json
+          if [ -f pnpm-lock.yaml ]; then
+            git add pnpm-lock.yaml
+          fi
           git commit -m "chore: release v${{ github.event.inputs.version }}"
           git tag -a "v${{ github.event.inputs.version }}" -m "Release v${{ github.event.inputs.version }}"
 

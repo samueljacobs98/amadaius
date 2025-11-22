@@ -28,8 +28,10 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Update npm
-        run: npm install -g npm@latest
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.13.1
 
       - name: Determine version to publish
         id: version
@@ -43,7 +45,7 @@ jobs:
           elif [ "${{ github.event_name }}" = "push" ]; then
             VERSION="${GITHUB_REF_NAME#v}"
           else
-            VERSION=$(npm pkg get version | tr -d '"')
+            VERSION=$(pnpm pkg get version | tr -d '"')
           fi
           if [ -z "$VERSION" ]; then
             echo "::error::Unable to determine version to publish." >&2
@@ -56,16 +58,16 @@ jobs:
           CURRENT=$(node -p "require('./package.json').version")
           TARGET="${{ steps.version.outputs.version }}"
           if [ "$CURRENT" != "$TARGET" ]; then
-            npm version "$TARGET" --no-git-tag-version
+            pnpm version "$TARGET" --no-git-tag-version
           fi
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install
 
       - name: Build package
-        run: npm run build --if-present
+        run: pnpm run build --if-present
 
       - name: Run tests
-        run: npm test
+        run: pnpm test
 
       - name: Publish package
-        run: npm publish
+        run: pnpm publish

@@ -32,7 +32,7 @@ First off, thank you for taking the time to contribute! We welcome community con
 - You'll need Node.js.
 - Install the project dependencies:
   ```bash
-  npm install
+  pnpm install
   ```
 
 ---
@@ -93,7 +93,7 @@ We use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) to
 **Run Lint**:
 
 ```bash
-npm run lint
+pnpm run lint
 ```
 
 Make sure there are no errors before pushing your changes.
@@ -101,7 +101,13 @@ Make sure there are no errors before pushing your changes.
 **Formatting**: We use Prettier to format code. Run the following command to format your code:
 
 ```bash
-npm run format
+pnpm run format:check
+```
+
+To automatically format files, run:
+
+```bash
+pnpm run format:fix
 ```
 
 ---
@@ -111,7 +117,7 @@ npm run format
 We use Jest for testing. Run the following command to run tests:
 
 ```bash
-npm test
+pnpm test
 ```
 
 This command will also generate a coverage report in the `coverage` directory by default.

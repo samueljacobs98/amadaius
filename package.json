@@ -11,6 +11,7 @@
     "LICENSE"
   ],
   "license": "MIT",
+  "packageManager": "pnpm@10.13.1",
   "save-exact": true,
   "homepage": "https://github.com/samueljacobs98/amadaius#readme",
   "repository": {
