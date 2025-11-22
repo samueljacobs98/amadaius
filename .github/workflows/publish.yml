@@ -1,55 +1,75 @@
-name: Publish
+name: Publish to NPM
 
 on:
-  workflow_run:
-    workflows: ["Release"]
-    types:
-      - completed
+  push:
+    tags:
+      - 'v*'
   workflow_dispatch:
     inputs:
       version:
-        description: "Version to publish (optional)"
+        description: 'Version to publish (e.g., 1.2.3)'
         required: false
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          registry-url: https://registry.npmjs.org/
-          always-auth: true
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
 
-      - run: npm ci
-      - run: npm run build
-      - run: npm pack --dry-run
+      - name: Update npm
+        run: npm install -g npm@latest
 
-      - name: Determine version
+      - name: Determine version to publish
         id: version
         run: |
+          # Priority order:
+          # 1. Manual input
+          # 2. Tag that triggered the workflow (v1.2.3 -> 1.2.3)
+          # 3. Package.json version (default)
           if [ -n "${{ github.event.inputs.version }}" ]; then
             VERSION="${{ github.event.inputs.version }}"
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            VERSION="${GITHUB_REF_NAME#v}"
           else
-            VERSION=$(node -p "require('./package.json').version")
+            VERSION=$(npm pkg get version | tr -d '"')
           fi
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-          echo "Publishing version ${VERSION}"
 
-      - name: Check if package exists
+          if [ -z "$VERSION" ]; then
+            echo "::error::Unable to determine version to publish." >&2
+            exit 1
+          fi
+
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Publishing version ${VERSION} (defaulting to package.json when not specified)"
+
+      - name: Align package version
         run: |
-          if npm view amadaius@$(node -p "require('./package.json').version") version > /dev/null 2>&1; then
-            echo "Warning: This version already exists on npm"
-          else
-            echo "✓ Version is available for publishing"
+          CURRENT=$(node -p "require('./package.json').version")
+          TARGET="${{ steps.version.outputs.version }}"
+          if [ "$CURRENT" != "$TARGET" ]; then
+            npm version "$TARGET" --no-git-tag-version
           fi
 
-      - name: Publish to npm using trusted publishing
-        run: npm publish --provenance --access public
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build package
+        run: npm run build --if-present
+
+      - name: Run tests
+        run: npm test
+
+      - name: Publish package
+        run: npm publish
