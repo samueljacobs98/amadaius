@@ -1,0 +1,78 @@
+---
+title: PartialPromptTemplate
+description: Apply data incrementally, then finalize prompts synchronously or asynchronously.
+---
+
+A template that can be progressively filled with data before finalising. It has the same underlying schema as the original `PromptTemplate`.
+
+## `partial(data)`
+
+Partially applies data to the template.
+
+**Signature**
+
+```typescript
+partial(data: DeepPartial<z.input<TSchema>>): PartialPromptTemplate<TSchema>;
+```
+
+**Parameters**
+
+- `data`: A **partial** version of what `TSchema` expects. Each call merges with existing partial data.
+
+**Returns**
+
+- The `PartialPromptTemplate` instance.
+
+## `build()`
+
+Finalises the partial data, validates it with the original schema, and compiles the template into a string. Throws Zod validation error if the partial data is not sufficient or invalid.
+
+**Signature**
+
+```typescript
+build(): PromptTemplateBuildResult<TSchema>;
+```
+
+**Returns**
+
+An object containing:
+
+- `prompt`: The rendered template string
+- `metadata`: Object containing:
+  - `type`: "partial"
+  - `templateStr`: Original template string
+  - `data`: The validated/transformed data
+  - Optional fields: `templateId`, `experimentId`, `version`, `description`, `custom`
+
+**Throws**
+
+- Zod validation errors if the partial data doesn't match the schema.
+
+## `buildAsync()`
+
+Finalises the partial data, validates it with the original schema, and compiles the template into a string asynchronously.
+
+**Signature**
+
+```typescript
+async buildAsync(): Promise<PromptTemplateBuildResult<TSchema>>;
+```
+
+**Returns**
+
+A promise that resolves to an object containing:
+
+- `prompt`: The rendered template string
+- `metadata`: Object containing:
+  - `type`: "partial"
+  - `templateStr`: Original template string
+  - `data`: The validated/transformed data
+  - Optional fields: `templateId`, `experimentId`, `version`, `description`, `custom`
+
+**Throws**
+
+- Zod validation errors if the partial data doesn't match the schema.
+
+## `copy()`
+
+Creates a new `PartialPromptTemplate` instance with the same partial data. Useful for creating branches from a partially-applied template without interfering with each other's data.

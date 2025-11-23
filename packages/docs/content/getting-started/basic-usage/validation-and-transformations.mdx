@@ -1,0 +1,47 @@
+---
+title: Validation and Transformations
+description: Use Zod to refine, validate, and enrich prompt data.
+---
+
+Zod can do more than just type-check. You can refine, transform, and set default values. If data fails validation, an error is thrown.
+
+```typescript
+import { promptTemplate } from "amadaius";
+import { z } from "zod";
+
+// Example of refining schema
+const pt = promptTemplate(
+  z
+    .object({ id: z.string(), name: z.string() })
+    .refine((data) => data.id.length === 10, {
+      message: "User ID must be exactly 10 characters long",
+    }),
+  "Hello, {{name}}! Your ID is {{id}}.",
+);
+
+try {
+  const { prompt } = pt.build({ id: "0123456789", name: "Alice" });
+  console.log(prompt);
+  // -> "Hello, Alice! Your ID is 0123456789."
+
+  pt.build({ id: "short", name: "Invalid" }); // This will throw a Zod validation error
+} catch (error) {
+  console.error(error);
+  // -> ZodError: User ID must be exactly 10 characters long
+}
+```
+
+You can also transform data using Zod's `transform` method.
+
+```typescript
+const pt = promptTemplate(
+  z.string().transform((topic) => ({ topic })), // transforms a string into { topic },
+  "Write a story about {{topic}}!",
+);
+
+// We can pass just a string; the schema transforms it into { topic }
+const { prompt } = pt.build("dinosaurs");
+
+console.log(prompt);
+// -> "Write a story about dinosaurs!"
+```

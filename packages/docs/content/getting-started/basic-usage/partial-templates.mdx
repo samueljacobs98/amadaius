@@ -1,0 +1,38 @@
+---
+title: Partial Templates
+description: Fill in prompt data over multiple steps and build when ready.
+---
+
+Sometimes you need to **partially apply** data to a template and fill in the rest later. You can convert a `PromptTemplate` into a `PartialPromptTemplate` using `asPartial()` and fill in data incrementally with `partial(data)`.
+
+```typescript
+import { promptTemplate } from "amadaius";
+import { z } from "zod";
+
+const pt = promptTemplate(
+  z.object({ persona: z.string(), message: z.string() }),
+  "You are {{persona}}. Respond to: {{message}}",
+);
+
+// Convert to partial template
+const partialPt = pt.asPartial();
+// Fill data in multiple steps
+partialPt.partial({ persona: "a knowledgeable AI librarian" });
+partialPt.partial({ message: "What are the best science fiction books?" });
+
+// When you're ready, build the final string
+const { prompt } = partialPt.build();
+
+console.log(prompt);
+// -> "You are a knowledgeable AI librarian. Respond to: What are the best science fiction books?"
+```
+
+You can also **copy** a `PartialPromptTemplate` to create a new instance with the same data.
+
+```typescript
+const partialPtCopy = partialPt.copy();
+const { prompt: copyPrompt } = partialPtCopy.build();
+console.log(copyPrompt);
+// -> "You are a knowledgeable AI librarian. Respond to: What are the best science fiction books?"
+// partialPromptCopy shares the same partial data initially, then you can branch out
+```

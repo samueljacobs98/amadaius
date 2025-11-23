@@ -1,0 +1,60 @@
+---
+title: Release Process
+description: How releases and npm publishing are automated for Amadaius.
+---
+
+Releases are managed through two separate GitHub Actions workflows.
+
+## 1. Release workflow
+
+The **Release** workflow handles versioning and creates the GitHub release. To create a new release:
+
+1. **Go to the Actions tab** in the GitHub repository
+2. **Select the "Release" workflow** from the left sidebar
+3. **Click "Run workflow"** and select the branch (usually `main`)
+4. **Enter the version number** in semver format (e.g., `1.2.3`, `2.0.0`, `1.2.3-beta.1`)
+5. **Click "Run workflow"** to start the release process
+
+The Release workflow will:
+
+- ✅ Build and verify the project
+- ✅ Check if the version already exists (prevents duplicate releases)
+- ✅ Bump the version in `package.json` and `pnpm-lock.yaml`
+- ✅ Create a git tag with the version
+- ✅ Push the changes and tag to the repository
+- ✅ Create a GitHub release
+- ✅ Automatically trigger the Publish workflow
+
+## 2. Publish workflow
+
+The **Publish** workflow handles publishing to npm. It runs automatically after a successful Release workflow, but can also be manually triggered if needed (e.g., if the initial publish failed due to authentication issues). The workflow uses pnpm to install dependencies, build, test, and publish the package.
+
+The Publish workflow will:
+
+- ✅ Build and verify the package
+- ✅ Verify npm authentication
+- ✅ Publish the package to npm
+
+### To manually trigger the Publish workflow
+
+1. Go to the Actions tab
+2. Select the "Publish" workflow
+3. Click "Run workflow"
+4. Optionally specify a version (defaults to the version in `package.json`)
+
+### Trusted publishing setup
+
+Both workflows use npm's **trusted publishing** (OIDC) for secure authentication. To set it up:
+
+1. Go to https://www.npmjs.com/settings/YOUR_USERNAME/automation
+2. Click "Add GitHub Actions" or "Add Trusted Publisher"
+3. Enter the following details:
+   - **Organization/User:** `samueljacobs98`
+   - **Repository:** `samueljacobs98/amadaius`
+   - **Workflow filename:** `publish.yml` (must match exactly, including case!)
+   - **Environment name:** (leave blank)
+4. Grant publish permissions
+
+⚠️ **Important:** The workflow filename must be exactly `publish.yml` for trusted publishing to work.
+
+No `NPM_TOKEN` secret is needed! Trusted publishing is more secure and future-proof than classic tokens.

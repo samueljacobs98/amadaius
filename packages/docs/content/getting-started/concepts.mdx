@@ -1,0 +1,26 @@
+---
+title: Concepts
+description: Core ideas that shape how Amadaius builds and composes prompts.
+---
+
+## Prompt structure vs. content
+
+- **Prompt structure**: How the content of the prompt is laid out, defined using a Handlebars template string.
+- **Prompt content**: The validated and enriched data provided to the template to populate the structure.
+
+## Validation and enrichment with Zod
+
+- **Validation**: Ensures the data adheres to the expected shape and constraints.
+- **Enrichment**: Transforms or adds data using Zod's `transform` method.
+
+## Handlebars helpers
+
+Custom functions injected into templates to add dynamic behavior.
+
+## Separation of concerns
+
+Amadaius emphasizes keeping **content** (data) and **structure** (template) independent, enabling easier reuse and localization.
+
+## Modular template composition
+
+Use the `asSchema` method to compose smaller prompt templates into larger, more complex templates, promoting modularity and reusability.
