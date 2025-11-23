@@ -1,0 +1,40 @@
+{
+  "name": "docs",
+  "version": "0.0.0",
+  "dependencies": {
+    "@amadaius/docs": "workspace:*",
+    "@frontend/ui": "workspace:*",
+    "fumadocs-core": "15.8.5",
+    "fumadocs-mdx": "12.0.3",
+    "fumadocs-ui": "15.8.5",
+    "lucide-react": "0.544.0",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@config/eslint": "workspace:*",
+    "@config/typescript": "workspace:*",
+    "@tailwindcss/postcss": "catalog:",
+    "@types/mdx": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "eslint": "catalog:",
+    "postcss": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:",
+    "zod": "catalog:"
+  },
+  "private": true,
+  "repository": "https://github.com/samueljacobs98/amadaius/tree/main/apps/docs",
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev --turbopack --port 3001",
+    "lint": "next lint --max-warnings 0",
+    "postinstall": "fumadocs-mdx",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "type": "module"
+}

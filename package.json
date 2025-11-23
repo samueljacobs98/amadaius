@@ -24,6 +24,7 @@
     "deps:lint": "syncpack lint && syncpack lint-semver-ranges",
     "deps:list": "syncpack list --show summary",
     "deps:update": "syncpack update",
+    "dev": "turbo run dev",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "format:check": "turbo run format:check --cache-dir=.turbo",
     "format:fix": "turbo run format:fix --cache-dir=.turbo",
