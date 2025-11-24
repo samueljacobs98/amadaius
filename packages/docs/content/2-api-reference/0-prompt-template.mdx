@@ -1,0 +1,121 @@
+---
+title: promptTemplate and PromptTemplate
+description: Create fully specified prompt templates and render them synchronously or asynchronously.
+---
+
+## `promptTemplate(schema, templateStr, options?)`
+
+Creates a new `PromptTemplate` instance.
+
+**Signature**
+
+```typescript
+function promptTemplate<TSchema extends ZodType<any, any>>(
+  schema: TSchema,
+  templateStr: string,
+  options?: PromptTemplateOptions,
+): PromptTemplate<TSchema>;
+```
+
+**Parameters**
+
+- `schema`: A Zod schema describing the shape of the data needed by your template.
+- `templateStr`: A Handlebars template string.
+- `options?`: Optional configuration:
+  - `helpers?: Record<string, (...args: any) => any>`: A key-value map of custom Handlebars helpers.
+
+**Returns**
+
+- A new `PromptTemplate` instance.
+
+---
+
+## Class: `PromptTemplate<TSchema>`
+
+A fully specified prompt template. You create an instance of this class using `promptTemplate`.
+
+### `build(data)`
+
+Builds the prompt string using the provided data.
+
+**Signature**
+
+```typescript
+build(data: z.input<TSchema>): PromptTemplateBuildResult<TSchema>;
+```
+
+**Parameters**
+
+- `data`: Data matching the schema.
+
+**Returns**
+
+An object containing:
+
+- `prompt`: The rendered template string
+- `metadata`: Object containing:
+  - `type`: "full" | "partial"
+  - `templateStr`: Original template string
+  - `data`: The validated/transformed data
+  - Optional fields: `templateId`, `experimentId`, `version`, `description`, `custom`
+
+**Throws**
+
+- Zod validation errors if `data` doesn't match the schema.
+
+### `buildAsync(data)`
+
+Builds the prompt string asynchronously using the provided data. This enables asynchronous data transformations (e.g., when using `z.transform(async ...)` in Zod).
+
+**Signature**
+
+```typescript
+async buildAsync(data: z.input<TSchema>): Promise<PromptTemplateBuildResult<TSchema>>;
+```
+
+**Parameters**
+
+- `data`: Data matching the schema.
+
+**Returns**
+
+A promise that resolves to an object containing:
+
+- `prompt`: The rendered template string
+- `metadata`: Object containing:
+  - `type`: "full" | "partial"
+  - `templateStr`: Original template string
+  - `data`: The validated/transformed data
+  - Optional fields: `templateId`, `experimentId`, `version`, `description`, `custom`
+
+**Throws**
+
+- Zod validation errors if `data` doesn't match the schema.
+
+### `asSchema()`
+
+Enables prompt template composition by converting the `PromptTemplate` into a zod schema with a built-in `transform`.
+
+**Signature**
+
+```typescript
+asSchema(): ZodType<z.input<TSchema>, string, unknown>;
+```
+
+**Returns**
+
+- A new Zod schema with a built-in `transform` method that converts the data into a built prompt.
+
+### `asPartial()`
+
+Returns a `PartialPromptTemplate` based on a `PromptTemplate`, allowing you to partially apply data over multiple steps.
+
+**Signature**
+
+```typescript
+asPartial(): PartialPromptTemplate<TSchema>;
+```
+
+**Returns**
+
+- A new `PartialPromptTemplate` instance.

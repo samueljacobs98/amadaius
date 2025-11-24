@@ -1,0 +1,63 @@
+---
+title: Custom Handlebars Helpers
+description: Extend prompts with helper functions passed to the template engine.
+---
+
+You can add custom Handlebars helpers to your templates by passing them in the `helpers` option.
+
+```typescript
+import { promptTemplate } from "amadaius";
+import { z } from "zod";
+
+const pt = promptTemplate(
+  z.object({
+    persona: z.string(),
+    user_message: z.string(),
+    tone: z.enum(["formal", "casual", "enthusiastic"]),
+  }),
+  `
+  You are a helpful AI assistant who always follows the persona and tone specified below.
+  Persona: {{persona}}
+
+  User said: "{{transformTone user_message tone}}"
+
+  Please respond to the user's message in a manner consistent with the persona and tone above.
+  `,
+  {
+    helpers: {
+      transformTone: (
+        message: string,
+        tone: "formal" | "casual" | "enthusiastic",
+      ) => {
+        switch (tone) {
+          case "formal":
+            return `Good day. I would like to bring to your attention: ${
+              message.charAt(0).toUpperCase() + message.slice(1)
+            }.`;
+          case "casual":
+            return `Hey! So basically: ${message}`;
+          case "enthusiastic":
+            return `Wow, check this out: ${message}!!!`;
+          default:
+            return message;
+        }
+      },
+    },
+  },
+);
+
+const { prompt } = pt.build({
+  persona: "A knowledgeable librarian",
+  user_message: "could you help me find a good science fiction book?",
+  tone: "enthusiastic",
+});
+
+console.log(prompt);
+// -> `You are a helpful AI assistant who always follows the persona and tone specified below.
+//     Persona: A knowledgeable librarian
+//
+//    User said: "Wow, check this out: could you help me find a good science fiction book?!!!"
+//
+//    Please respond to the user's message in a manner consistent with the persona and tone above.
+// `
+```

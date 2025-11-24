@@ -1,0 +1,29 @@
+---
+title: Async Data Transformations
+description: Build prompts asynchronously when your schema performs async work.
+---
+
+Amadaius supports asynchronous data transformations using `buildAsync(data)`.
+
+```typescript
+import { promptTemplate } from "amadaius";
+import { z } from "zod";
+
+const asyncPt = promptTemplate(
+  z
+    .object({ productNumber: z.number() })
+    .transform(async ({ productNumber }) => {
+      await getProductData(productNumber);
+      return {
+        productNumber,
+        productData: JSON.stringify(productData, null, 2),
+      };
+    }),
+  "Act as an expert in creating product descriptions.\n\nProduct {{productNumber}}:\n\n{{productData}}\n\nCreate a product description based on the data provided.",
+);
+
+const { prompt } = await asyncPt.buildAsync({ productNumber: 1234 });
+
+console.log(prompt);
+// -> "Act as an expert in creating product descriptions.\n\nProduct 1234:\n\n{ ... }\n\nCreate a product description based on the data provided."
+```

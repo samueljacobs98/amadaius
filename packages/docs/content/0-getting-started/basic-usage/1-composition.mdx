@@ -1,0 +1,28 @@
+---
+title: Composing Templates
+description: Combine prompt templates using Zod schemas for modular prompts.
+---
+
+You can convert a `PromptTemplate` into a Zod schema using `asSchema()`. This allows you to compose prompt templates together.
+
+```typescript
+import { promptTemplate } from "amadaius";
+import { z } from "zod";
+
+// Define smaller prompt templates
+const pt1 = promptTemplate(z.object({ name: z.string() }), "Hello, {{name}}!");
+
+const pt2 = promptTemplate(z.object({ question: z.string() }), "{{question}}");
+
+// Compose them into a single prompt
+const { prompt } = promptTemplate(
+  z.object({ greeting: pt1.asSchema(), request: pt2.asSchema() }),
+  "{{greeting}} {{request}}",
+).build({
+  greeting: { name: "Alice" },
+  request: { question: "What is your favorite color?" },
+});
+
+console.log(prompt);
+// -> "Hello, Alice! What is your favorite color?"
+```

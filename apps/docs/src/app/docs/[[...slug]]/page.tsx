@@ -1,14 +1,7 @@
 import { Suspense } from "react";
 import { createRelativeLink } from "fumadocs-ui/mdx";
-import {
-  DocsBody,
-  DocsDescription,
-  DocsPage,
-  DocsTitle,
-} from "fumadocs-ui/page";
+import { DocsBody, DocsPage } from "fumadocs-ui/page";
 import type { Metadata } from "next";
-import { Badge } from "@frontend/ui/components";
-import { cn } from "@frontend/ui/utils";
 import {
   NotFoundCard,
   NotFoundCardHeader,
@@ -50,81 +43,9 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
   // @ts-expect-error -- properties exist at runtime
   const MDX = page.data.body;
 
-  const isAdr = page.slugs.includes("adr");
-  // @ts-expect-error -- properties exist at runtime
-  const date = page.data.date;
-  // @ts-expect-error -- properties exist at runtime
-  const status = page.data.status;
-  // @ts-expect-error -- properties exist at runtime
-  const adrNumber = page.data.adrNumber;
-
-  if (isAdr) {
-    return (
-      // @ts-expect-error -- properties exist at runtime
-      <DocsPage toc={page.data.toc} full={page.data.full}>
-        <div className="space-y-2">
-          <DocsTitle>
-            {adrNumber && (
-              <span
-                className={cn(
-                  "text-blue-400",
-                  status === "Accepted" && "text-green-400",
-                  status === "Proposed" && "text-yellow-400",
-                  status === "Deprecated" && "text-red-400",
-                  status === "Superseded" && "text-red-400",
-                )}
-              >
-                #{String(adrNumber).padStart(4, "0")}
-              </span>
-            )}{" "}
-            {page.data.title}
-          </DocsTitle>
-          <div className="flex flex-wrap items-center gap-2">
-            {status === "Accepted" && (
-              <Badge className="bg-green-400 text-white">Accepted</Badge>
-            )}
-            {status === "Proposed" && (
-              <Badge className="bg-yellow-400 text-white">Proposed</Badge>
-            )}
-            {status === "Deprecated" && (
-              <Badge variant="destructive" className="bg-red-400 text-white">
-                Deprecated
-              </Badge>
-            )}
-            {status === "Superseded" && (
-              <Badge variant="destructive" className="bg-red-400 text-white">
-                Superseded
-              </Badge>
-            )}
-            {date && (
-              <span className="text-muted-foreground text-sm">
-                {new Date(date).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </span>
-            )}
-          </div>
-        </div>
-        <DocsBody>
-          <MDX
-            components={getMDXComponents({
-              // this allows you to link to other pages with relative file paths
-              a: createRelativeLink(source, page),
-            })}
-          />
-        </DocsBody>
-      </DocsPage>
-    );
-  }
-
   return (
     // @ts-expect-error -- properties exist at runtime
     <DocsPage toc={page.data.toc} full={page.data.full}>
-      <DocsTitle>{page.data.title}</DocsTitle>
-      <DocsDescription>{page.data.description}</DocsDescription>
-
       <DocsBody>
         <MDX
           components={getMDXComponents({

@@ -1,0 +1,32 @@
+---
+title: Creating a Prompt Template
+description: Define schemas and templates, then render prompts with Amadaius.
+---
+
+1. **Define a schema** describing the data your prompt needs.
+2. **Define a template string** (Handlebars syntax) that references properties in the schema.
+3. Create a `PromptTemplate` using `promptTemplate(schema, templateStr, options)`.
+
+```typescript
+import { promptTemplate } from "amadaius";
+import { z } from "zod";
+
+// Template references `{{topic}}`
+const pt = promptTemplate(
+  z.object({ topic: z.string() }),
+  "Write a story about {{topic}}!",
+);
+
+// Provide data matching the schema
+const { prompt, metadata } = pt.build({ topic: "dragons" });
+
+console.log(prompt);
+// -> "Write a story about dragons!"
+
+console.log(metadata);
+// -> {
+//      type: "full",
+//      templateStr: "Write a story about {{topic}}!",
+//      data: { topic: "dragons" }
+//    }
+```
